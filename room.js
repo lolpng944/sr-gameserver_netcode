@@ -25,7 +25,7 @@ async function joinRoom(ws, token) {
     try {
       const expectedOrigin = "tw-editor://.";
       const response = await axios.get(
-        `https://liquemgames-api.netlify.app/verify-token/${token}`,
+        `https://liquemgames-api.netlify.app/verify-gameservertoken/${token}`,
         {
           headers: {
             Origin: expectedOrigin,
