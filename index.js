@@ -6,7 +6,7 @@ const rateLimit = require("express-rate-limit");
 const LZString = require("lz-string");
 
 const server = http.createServer();
-const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true });
+const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true, proxy: true });
 
 let connectedClientsCount = 0;
 
