@@ -262,9 +262,32 @@ setInterval(() => {
 }, server_tick_rate);
 
 
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  // You can handle the error or perform cleanup here
+});
+
+// Global error handler for unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
+  // You can handle the rejection or perform cleanup here
+});
+
+module.exports = {
+  handleGlobalErrors: () => {
+    // No need for anything here since the error handlers are already registered
+  }
+};
+
+
+
+
+
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
 });
+
 
