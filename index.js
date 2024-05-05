@@ -4,9 +4,17 @@ const cors = require("cors");
 const axios = require("axios");
 const rateLimit = require("express-rate-limit");
 const LZString = require("lz-string");
+const { RateLimiterMemory } = require('rate-limiter-flexible');
 
-const server = http.createServer();
+const ConnectionOptionsRateLimit = {
+  points: 1, // Number of points
+  duration: 60, // Per second
+};
+
+const rateLimiterConnection = new RateLimiterMemory(ConnectionOptionsRateLimit);
+
 const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true, proxy: true });
+const server = http.createServer();
 
 let connectedClientsCount = 0;
 
@@ -21,18 +29,20 @@ const { increasePlayerDamage, increasePlayerKills, increasePlayerPlace, increase
 
 
 const {
-  server_tick_rate,
   game_win_rest_time,
   maxClients,
-  rooms,
 } = require('./config');
 
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,
-  max: 5,
+  max: 1,
   message: "lg_server_limit_reached",
 });
+
+app.use(limiter);
+
+
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -140,30 +150,33 @@ function isValidOrigin(origin) {
   return allowedOrigins.includes(trimmedOrigin);
 }
 
-
-
-
 wss.on("connection", (ws, req) => {
-  const token = req.url.slice(1);
+  rateLimiterConnection.consume(req.socket.remoteAddress)
+   
+    .then(() => {
+      const token = req.url.slice(1);
+       const ip = req.socket.remoteAddress;
+       console.log('Client connected from IP:', ip);
 
-  const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
-  console.log(origin);
+      const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
+      console.log(origin);
 
-  if (!isValidOrigin(origin)) {
-    ws.close(4004, "Unauthorized");
-    return;
-  }
-
-  joinRoom(ws, token)
-    .then((result) => {
-      if (!result) {
-        ws.close(4001, "Invalid token");
+      if (!isValidOrigin(origin)) {
+        ws.close(4004, "Unauthorized");
         return;
       }
 
-      connectedClientsCount++;
+      joinRoom(ws, token)
+        .then((result) => {
+          if (!result) {
+            ws.close(4001, "Invalid token");
+            return;
+          }
 
-      console.log("Joined room:", result);
+          connectedClientsCount++;
+
+          console.log("Joined room:", result);
+  
 
       ws.on("message", (message) => {
         if (result.room.players.has(result.playerId)) {
@@ -180,11 +193,6 @@ wss.on("connection", (ws, req) => {
         connectedClientsCount--;
         const player = result.room.players.get(result.playerId);
         clearInterval(player.moveInterval);
-
-
-
-
-
 
         if (player && player.timeout) {
           clearTimeout(player.timeout);
@@ -237,13 +245,20 @@ wss.on("connection", (ws, req) => {
             return;
           }
         }
+   
       });
-    })
-    .catch((error) => {
-      console.error("Error during joinRoom:", error);
-      ws.close(4001, "Token verification error");
-    });
-});
+})
+    
+      .catch((error) => {
+                console.error("Error during joinRoom:", error);
+                ws.close(4001, "Token verification error");
+              });
+          })
+          .catch(() => {
+            // Rate limit exceeded
+            ws.close(4003, "Connection limit reached");
+          });
+      });
 
 
 server.on("upgrade", (request, socket, head) => {
@@ -257,28 +272,19 @@ server.on("upgrade", (request, socket, head) => {
   });
 });
 
-
-
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
-  // You can handle the error or perform cleanup here
 });
 
 // Global error handler for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection:', reason, promise);
-  // You can handle the rejection or perform cleanup here
 });
 
 module.exports = {
   handleGlobalErrors: () => {
-    // No need for anything here since the error handlers are already registered
   }
 };
-
-
-
-
 
 const PORT = process.env.PORT || 3000;
 
