@@ -15,8 +15,7 @@ const rateLimiterConnection = new RateLimiterMemory(ConnectionOptionsRateLimit);
 
 
 const server = http.createServer();
-const wss = new WebSocket.Server({ server });
-//const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true });
+const wss = new WebSocket.Server({ noServer: false, perMessageDeflate: true });
 
 let connectedClientsCount = 0;
 
@@ -48,7 +47,8 @@ app.use(limiter);
 
 app.use(cors());
 app.use(bodyParser.json());
-app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+//app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
+app.set("trust proxy", true);
 
 const MAX_REQUEST_SIZE = 1700;
 const MAX_PARAM_BODY_LENGTH = 100;
