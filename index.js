@@ -8,7 +8,7 @@ const { RateLimiterMemory } = require('rate-limiter-flexible');
 
 const ConnectionOptionsRateLimit = {
   points: 1, // Number of points
-  duration: 60, // Per second
+  duration: 10, // Per second
 };
 
 const express = require("express");
@@ -161,8 +161,8 @@ wss.on("connection", (ws, req) => {
    
     .then(() => {
       const token = req.url.slice(1);
-       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-       console.log('Client connected from IP:', ip);
+       //const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      // console.log('Client connected from IP:', ip);
 
       const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
       console.log(origin);
