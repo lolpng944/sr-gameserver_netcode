@@ -12,13 +12,23 @@ const {
     spawnPositions,
     batchedMessages,
     rooms,
+    walls,
    // isValidDirection,
 } = require('./config');
 
 
 
 
-
+function closeRoom(roomId) {
+  const room = rooms.get(roomId);
+  if (room) {
+    clearInterval(room.intervalId); // Clear the interval associated with the room
+    rooms.delete(roomId); // Remove the room from the rooms map
+    console.log(`Room ${roomId} closed.`);
+  } else {
+    console.log(`Room ${roomId} not found.`);
+  }
+}
 
 async function joinRoom(ws, token) {
   return new Promise(async (resolve, reject) => {
@@ -254,8 +264,19 @@ function createRoom(roomId) {
     winner: 0,
     eliminatedPlayers: [],
   };
+
   rooms.set(roomId, room);
   generateRandomCoins(room);
+
+  const intervalId = setInterval(() => {
+    // Assuming you have a function sendBatchedMessages that takes a room object as an argument
+    sendBatchedMessages(room);
+   
+  }, server_tick_rate);
+
+  // Store the interval ID with the room for later cleanup
+  room.intervalId = intervalId;
+
   return room;
 }
 
@@ -433,5 +454,6 @@ module.exports = {
   createRoom,
   generateRandomCoins,
   handleRequest,
+  closeRoom
  
 };

@@ -1,19 +1,96 @@
 
 
-const { walls, teleporters } = require('./config');
+const { walls, teleporters, WORLD_HEIGHT, WORLD_WIDTH, playerHitboxHeight, playerHitboxWidth,  } = require('./config');
+
+
+const gridSize = 50; // Size of each grid cellc
+const wallblocksize = 50;
+const halfGridWidth = Math.ceil(WORLD_WIDTH * 2 / gridSize  / 2 ); // Half of grid width
+const halfGridHeight = Math.ceil(WORLD_HEIGHT * 2 / gridSize / 2 ); // Half of grid height
+
+// Create a grid where each cell contains a list of walls in that cell
+const grid = Array.from({ length: halfGridWidth * 2 }, () =>
+  Array.from({ length: halfGridHeight * 2 }, () => [])
+);
+
+// Populate the grid with walls
+for (const wall of walls) {
+  // Calculate the grid coordinates of the wall (adjust for negative values)
+  const gridX = Math.floor((wall.x + WORLD_WIDTH * 2 / 2) / gridSize);
+  const gridY = Math.floor((wall.y + WORLD_HEIGHT * 2 / 2) / gridSize);
+
+  if (gridX >= 0 && gridX < grid.length && gridY >= 0 && gridY < grid[0].length) {
+    // If the wall is within the grid bounds, push it into the corresponding cell
+    grid[gridX][gridY].push(wall);
+  } else {
+    // Wall is outside the grid bounds, log an error
+    console.log("Invalid wall position:", wall.x, wall.y);
+  }
+}
+
+console.log("Grid initialization completed");
+//console.log(grid);
+
+/*function isCollisionWithWalls(x, y) {
+  // Calculate the grid coordinates of the point (x, y)
+  const offsetX = -80; // Adjust this offset as needed
+  const offsetY = -80; 
+  const gridX = Math.floor((x + WORLD_WIDTH * 2 / 2 - offsetX) / gridSize);
+  const gridY = Math.floor((y + WORLD_HEIGHT * 2 / 2 - offsetY) / gridSize);
+
+  const playerLeft = x - 5;
+  const playerRight = x + 5;
+  const playerTop = y - 0;
+  const playerBottom = y + 0;
+
+  // Check adjacent grid cells for walls
+  for (let dx = -1; dx <= 1; dx++) 
+   
+    for (let dy = -1; dy <= 1; dy++) {
+
+      
+      const adjacentX = gridX + dx;
+      const adjacentY = gridY + dy;
+
+      if (grid[adjacentX] && grid[adjacentX][adjacentY]) {
+            for (const wall of grid[adjacentX][adjacentY]) {
+
+              const wallLeft = wall.x - wallblocksize;
+              const wallRight = wall.x + wallblocksize;
+              const wallTop = wall.y - wallblocksize;
+              const wallBottom = wall.y + wallblocksize;
+              
+              if (
+                playerRight > wallLeft &&
+                playerLeft < wallRight &&
+                playerTop > wallTop &&
+                playerBottom < wallBottom
+              ) {
+                return true; // Collision detected
+              }
+            }
+          }
+       
+
+      }
+
+  return false; // No collision with nearby walls
+}
+*/
 
 function isCollisionWithWalls(x, y) {
   // Filter only the walls that are within the threshold distance from (x, y)
-  const threshold = 1;
+  const threshold = 100;
+  let collisionDetected = false;
   const nearbyWalls = walls.filter((wall) => {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
     const closestX = Math.max(
-      wall.x - wall.width / 2,
-      Math.min(x, wall.x + wall.width / 2),
+      wall.x - wallblocksize,
+      Math.min(x, wall.x + wallblocksize),
     );
     const closestY = Math.max(
-      wall.y - wall.height / 2,
-      Math.min(y, wall.y + wall.height / 2),
+      wall.y - wallblocksize,
+      Math.min(y, wall.y + wallblocksize),
     );
     const distanceX = x - closestX;
     const distanceY = y - closestY;
@@ -24,60 +101,28 @@ function isCollisionWithWalls(x, y) {
 
   // Check for collision with each nearby wall
   for (const wall of nearbyWalls) {
-    const wallLeft = wall.x - wall.width / 2;
-    const wallRight = wall.x + wall.width / 2;
-    const wallTop = wall.y - wall.height / 2;
-    const wallBottom = wall.y + wall.height / 2;
+    // Consider adjusting the collision detection logic based on the shape of walls
+    const wallLeft = wall.x - wallblocksize / 2;
+    const wallRight = wall.x + wallblocksize / 2;
+    const wallTop = wall.y - wallblocksize / 2;
+    const wallBottom = wall.y + wallblocksize / 2;
+
+    // Adjust the collision condition based on the specific requirements of your walls
     if (
-      x + 60 > wallLeft &&
-      x < wallRight &&
-      y + 300 > wallTop &&
-      y < wallBottom
+      x + 20 > wallLeft &&
+      x - 20 < wallRight &&
+      y + 50 > wallTop &&
+      y - 50 < wallBottom
     ) {
-      return true; // Collision detected
+      collisionDetected = true; // Collision detected
+      break; 
+       // Collision detected
     }
   }
-  return false; // No collision with nearby walls
+
+   return collisionDetected;// No collision with nearby walls
 }
 
-function isCollisionWithTeleporters(x, y) {
-  // Filter only the teleporters that are within the threshold distance from (x, y)
-  const threshold = 200;
-  const nearbyTeleporters = teleporters.filter((teleporter) => {
-    // Calculate the distance between the point (x, y) and the closest point on the teleporter's perimeter
-    const closestX = Math.max(
-      teleporter.x - teleporter.width / 2,
-      Math.min(x, teleporter.x + teleporter.width / 2),
-    );
-    const closestY = Math.max(
-      teleporter.y - teleporter.height / 2,
-      Math.min(y, teleporter.y + teleporter.height / 2),
-    );
-    const distanceX = x - closestX;
-    const distanceY = y - closestY;
-    const distance = Math.sqrt(distanceX * distanceX + distanceY * distanceY);
-
-    return distance < threshold;
-  });
-
-  // Check for collision with each nearby teleporter
-  for (const teleporter of nearbyTeleporters) {
-    const teleporterLeft = teleporter.x - teleporter.width / 2;
-    const teleporterRight = teleporter.x + teleporter.width / 2;
-    const teleporterTop = teleporter.y - teleporter.height / 2;
-    const teleporterBottom = teleporter.y + teleporter.height / 2;
-    if (
-      x + 60 > teleporterLeft &&
-      x < teleporterRight &&
-      y + 300 > teleporterTop &&
-      y < teleporterBottom
-    ) {
-     
-      return true; // Collision detected
-    }
-  }
-  return false; // No collision with nearby teleporters
-}
 
 
 
@@ -90,6 +135,68 @@ function calculateBulletEndpoint(startX, startY, direction, length) {
 }
 
 
+
+
+
+
+
+
+/*function adjustBulletEndpoint(room, bullet) {
+  // Assuming room has a walls property containing wall data
+  console.log("wall");
+
+  const gridX = Math.floor((bullet.startX + WORLD_WIDTH / 2) / gridSize);
+  const gridY = Math.floor((bullet.startY + WORLD_HEIGHT / 2) / gridSize);
+
+  // Check adjacent grid cells for walls
+  for (let dx = -1; dx <= 1; dx++) {
+    for (let dy = -1; dy <= 1; dy++) {
+      const adjacentX = gridX + dx;
+      const adjacentY = gridY + dy;
+
+      // Check if adjacent grid cell is within bounds
+     if (
+        adjacentX >= 0 &&
+        adjacentX < grid.length &&
+        adjacentY >= 0 &&
+        adjacentY < grid[0].length
+      ) {
+      
+        // Check if grid cell contains walls
+        if (grid[adjacentX][adjacentY] && grid[adjacentX][adjacentY].length > 0) {
+          for (const wall of grid[adjacentX][adjacentY]) {
+            const wallLeft = wall.x - wallblocksize / 2;
+            const wallRight = wall.x + wallblocksize / 2;
+            const wallTop = wall.y - wallblocksize / 2;
+            const wallBottom = wall.y + wallblocksize / 2;
+
+            // Calculate the intersection point between the bullet's path and the wall
+            const intersection = lineRectIntersection(
+              bullet.startX,
+              bullet.startY,
+              bullet.endX,
+              bullet.endY,
+              wallLeft,
+              wallTop,
+              wallblocksize,
+              wallblocksize,
+            );
+
+
+            // If there's an intersection, adjust the bullet's endpoint
+            if (intersection) {
+              bullet.endX = intersection.x;
+              bullet.endY = intersection.y;
+              return; // Exit the function since bullet can only hit one wall
+            }
+          }
+        }
+      }
+    }
+  }
+}
+*/
+
 function adjustBulletEndpoint(room, bullet) {
   //const walls = room.walls; // Assuming room has a walls property containing wall data
 
@@ -97,12 +204,12 @@ function adjustBulletEndpoint(room, bullet) {
   const nearbyWalls = walls.filter((wall) => {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
     const closestX = Math.max(
-      wall.x - wall.width / 2,
-      Math.min(bullet.startX, wall.x + wall.width / 2),
+      wall.x - wallblocksize,
+      Math.min(bullet.startX, wall.x + wallblocksize / 2),
     );
     const closestY = Math.max(
-      wall.y - wall.height / 2,
-      Math.min(bullet.startY, wall.y + wall.height / 2),
+      wall.y - wallblocksize,
+      Math.min(bullet.startY, wall.y + wallblocksize / 2),
     );
     const distanceX = bullet.startX - closestX;
     const distanceY = bullet.startY - closestY;
@@ -112,10 +219,10 @@ function adjustBulletEndpoint(room, bullet) {
   });
 
   for (const wall of nearbyWalls) {
-    const wallLeft = wall.x - wall.width / 2;
-    const wallRight = wall.x + wall.width / 2;
-    const wallTop = wall.y - wall.height / 2;
-    const wallBottom = wall.y + wall.height / 2;
+    const wallLeft = wall.x - wallblocksize / 2;
+    const wallRight = wall.x + wallblocksize / 2;
+    const wallTop = wall.y - wallblocksize / 2;
+    const wallBottom = wall.y + wallblocksize / 2;
 
     // Calculate the intersection point between the bullet's path and the wall
     const intersection = lineRectIntersection(
@@ -125,8 +232,8 @@ function adjustBulletEndpoint(room, bullet) {
       bullet.endY,
       wallLeft,
       wallTop,
-      wall.width,
-      wall.height,
+      wallblocksize,
+      wallblocksize,
     );
 
     // If there's an intersection, adjust the bullet's endpoint
@@ -138,8 +245,10 @@ function adjustBulletEndpoint(room, bullet) {
   }
 }
 
+
 // Function to calculate intersection point between a line and a rectangle
 function lineRectIntersection(x1, y1, x2, y2, rx, ry, rw, rh) {
+  
   const dx = x2 - x1;
   const dy = y2 - y1;
   const p = [-dx, dx, -dy, dy];
@@ -162,7 +271,6 @@ function lineRectIntersection(x1, y1, x2, y2, rx, ry, rw, rh) {
 
   return { x: intersectionX, y: intersectionY };
 }
-
 
 
 
@@ -229,7 +337,7 @@ function isRectIntersectingLine(
 
 module.exports = {
   isCollisionWithWalls,
-  isCollisionWithTeleporters,
+  //isCollisionWithTeleporters,
   calculateBulletEndpoint,
   adjustBulletEndpoint,
   lineRectIntersection,

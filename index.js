@@ -16,7 +16,7 @@ module.exports = { LZString, axios, Limiter, WebSocket, http };
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const { sendBatchedMessages, joinRoom, handleRequest } = require('./room');
+const { sendBatchedMessages, joinRoom, closeRoom, handleRequest } = require('./room');
 const { increasePlayerDamage, increasePlayerKills, increasePlayerPlace, increasePlayerWins } = require('./dbrequests');
 
 
@@ -89,6 +89,8 @@ let nextPlayerId = 1;
 
 
 function endGame(room) {
+
+
   //   const player = room.players.get(playerId);
   // Additional logic to end the game and close the room
   console.log("Game ended! Closing the room.");
@@ -148,7 +150,7 @@ wss.on("connection", (ws, req) => {
   console.log(origin);
 
   if (!isValidOrigin(origin)) {
-    ws.close(4004, "Unauthorized origin");
+    ws.close(4004, "Unauthorized");
     return;
   }
 
@@ -177,6 +179,7 @@ wss.on("connection", (ws, req) => {
       ws.on("close", () => {
         connectedClientsCount--;
         const player = result.room.players.get(result.playerId);
+        clearInterval(player.moveInterval);
 
 
 
@@ -200,7 +203,7 @@ wss.on("connection", (ws, req) => {
         result.room.players.delete(result.playerId);
 
         if (result.room.players.size === 0) {
-          rooms.delete(result.roomId);
+          closeRoom(result.roomId);
           console.log(`Room closed`);
           return; // Exit early if the room is empty
         }
@@ -255,13 +258,6 @@ server.on("upgrade", (request, socket, head) => {
 });
 
 
-setInterval(() => {
-  rooms.forEach((room) => {
-    sendBatchedMessages(room);
-  });
-}, server_tick_rate);
-
-
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
@@ -270,7 +266,7 @@ process.on('uncaughtException', (error) => {
 
 // Global error handler for unhandled promise rejections
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection:', reason);
+  console.error('Unhandled Rejection:', reason, promise);
   // You can handle the rejection or perform cleanup here
 });
 

@@ -10,9 +10,9 @@ const {
     playerspeed,
     game_win_rest_time,
     guns_damage,
-    teleporters,
     max_room_players,
-
+    playerHitboxWidth,
+    playerHitboxHeight,
 } = require('./config');
 
 
@@ -44,14 +44,14 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
   player.y = player.lastProcessedPosition.y;
 }
 
-  if (isCollisionWithTeleporters(newX, newY)) {
+ /* if (isCollisionWithTeleporters(newX, newY)) {
      const collidedTeleporter = teleporters.find((teleporter) => {
        return (
          player.x + 60 > teleporter.x - teleporter.width / 2 &&
          player.x < teleporter.x + teleporter.width / 2 &&
          player.y + 300 > teleporter.y - teleporter.height / 2 &&
          player.y < teleporter.y + teleporter.height / 2
-       );
+      ); 
      });
 
      // If a teleporter was found
@@ -61,6 +61,7 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
        player.y = collidedTeleporter.destination.y;
      }
     }
+    */
      
     
   
@@ -105,55 +106,72 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
 
 function handleBulletCollision(room, bullet) {
   const eliminatedPlayers = [];
+  let nearestPlayer = null;
+  let minDistanceSquared = Infinity;
 
+  // Find the nearest player
   room.players.forEach((otherPlayer) => {
     if (
       otherPlayer.playerId !== bullet.playerId &&
       otherPlayer.visible !== false
     ) {
-      const playerHitboxWidth = 60; // Adjust as needed
-      const playerHitboxHeight = 120; // Adjust as needed
-      const shootingPlayer = room.players.get(bullet.playerId);
+      const dx = otherPlayer.x - bullet.startX;
+      const dy = otherPlayer.y - bullet.startY;
+      const distanceSquared = dx * dx + dy * dy;
 
+      if (distanceSquared < minDistanceSquared) {
+        minDistanceSquared = distanceSquared;
+        nearestPlayer = otherPlayer;
+      }
+    }
+  });
 
-
-  // Check if the nearest player intersects with the bullet trajectory
-  if (
-    isRectIntersectingLine(
-        otherPlayer.x - playerHitboxWidth / 2,
-        otherPlayer.y - playerHitboxHeight / 2,
-        otherPlayer.x + playerHitboxWidth / 2,
-        otherPlayer.y + playerHitboxHeight / 2,
-        bullet.startX,
-        bullet.startY,
-        bullet.endX,
-        bullet.endY,
-    )
-  ) {
+  // Check if a nearest player is found and within bullet trajectory
+  if (nearestPlayer && isRectIntersectingLine(
+    nearestPlayer.x - playerHitboxWidth / 2,
+    nearestPlayer.y - playerHitboxHeight / 2,
+    nearestPlayer.x + playerHitboxWidth / 2,
+    nearestPlayer.y + playerHitboxHeight / 2,
+    bullet.startX,
+    bullet.startY,
+    bullet.endX,
+    bullet.endY
+  )) {
+    // Handle collision with the nearest player
+    const shootingPlayer = room.players.get(bullet.playerId);
     const GUN_BULLET_DAMAGE = guns_damage[shootingPlayer.gun];
-    // Player hit by bullet
-    otherPlayer.health -= GUN_BULLET_DAMAGE;
-    shootingPlayer.damage += GUN_BULLET_DAMAGE;
-    otherPlayer.last_hit_time = new Date().getTime();
 
+    // Update player's health
+    nearestPlayer.health -= GUN_BULLET_DAMAGE;
+    shootingPlayer.damage += GUN_BULLET_DAMAGE;
+    nearestPlayer.last_hit_time = new Date().getTime();
+
+    // Update hitdata for shooting player
     const hitdata = {
       last_playerhit: {
-        playerId: otherPlayer.playerId,
+        playerId: nearestPlayer.playerId,
         datetime: new Date().getTime(),
         damage: GUN_BULLET_DAMAGE,
       },
     };
-
     shootingPlayer.hitdata = JSON.stringify(hitdata);
 
     setTimeout(() => {
-      shootingPlayer.hitdata = null; // or set it to whatever default value you need
+      shootingPlayer.hitdata = null;
     }, 1000);
 
-    if (otherPlayer.health <= 0) {
+    // Check if the player is eliminated
+    if (nearestPlayer.health <= 0) {
       // Player is eliminated
-      otherPlayer.visible = false;
+      nearestPlayer.visible = false;
+
       // Update player's place
+  /*    if (room.players.filter((player) => player.visible !== false).length === 1 && room.winner === 0) {
+        nearestPlayer.place = 2;
+      } else {
+        nearestPlayer.place = room.players.size - eliminatedPlayers.length;
+      }*/
+
       if (
         Array.from(room.players.values()).filter(
           (player) => player.visible !== false,
@@ -161,42 +179,44 @@ function handleBulletCollision(room, bullet) {
         room.winner === 0
       ) {
         // Only one player remains, the eliminated player gets 2nd place
-        otherPlayer.place = 2;
+        nearestPlayer.place = 2;
       } else {
         // More than one player remains, assign place based on remaining players
-        otherPlayer.place = room.players.size - eliminatedPlayers.length;
+        nearestPlayer.place = room.players.size - eliminatedPlayers.length;
       }
 
       const existingPlace = eliminatedPlayers.find(
-        (player) => player.place === otherPlayer.place,
+        (player) => player.place === nearestPlayer.place,
       );
 
+
       if (existingPlace) {
-        if (otherPlayer.place === max_room_players) {
-          otherPlayer.place = otherPlayer.place - 1;
+        if (nearestPlayer.place === max_room_players) {
+          nearestPlayer.place--;
         } else {
-          otherPlayer.place = otherPlayer.place + 1;
+          nearestPlayer.place++;
         }
       }
+
       room.eliminatedPlayers.push({
-        username: otherPlayer.playerId,
-        place: otherPlayer.place,
+        username: nearestPlayer.playerId,
+        place: nearestPlayer.place,
         eliminator: bullet.playerId,
       });
 
-      increasePlayerPlace(otherPlayer.playerId, otherPlayer.place);
+      increasePlayerPlace(nearestPlayer.playerId, nearestPlayer.place);
 
-      otherPlayer.visible = false; // Hide the eliminated player
+      nearestPlayer.visible = false;
 
-      shootingPlayer.kills += 1;
-
-      shootingPlayer.elimlast = otherPlayer.playerId;
+      // Update stats for shooting player
+      shootingPlayer.kills++;
+      shootingPlayer.elimlast = nearestPlayer.playerId;
 
       setTimeout(() => {
-        shootingPlayer.elimlast = null; // or set it to whatever default value you need
+        shootingPlayer.elimlast = null;
       }, 1000);
 
-      // Check if there's only one remaining player and declare winner if applicable
+      // Check for game end conditions
       if (
         Array.from(room.players.values()).filter(
           (player) => player.visible !== false,
@@ -206,7 +226,7 @@ function handleBulletCollision(room, bullet) {
         const remainingPlayer = Array.from(room.players.values()).find(
           (player) => player.visible !== false,
         );
-
+         
         room.winner = remainingPlayer.playerId;
         console.log(`Last player standing! ${room.winner} wins!`);
 
@@ -218,20 +238,16 @@ function handleBulletCollision(room, bullet) {
           place: 1,
         });
 
-        // Freeze all players for 5 seconds
         setTimeout(() => {
-          // End the game and close the room
           endGame(room);
         }, game_win_rest_time);
-        }
-            }
-          }
-        
-}
+      }
+    }
+  }
 
-  //room.eliminatedPlayers = eliminatedPlayers;
-});
-  };
+  return eliminatedPlayers;
+}
+  
 
 
 module.exports = {
