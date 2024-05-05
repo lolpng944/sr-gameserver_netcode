@@ -11,19 +11,25 @@ const ConnectionOptionsRateLimit = {
   duration: 60, // Per second
 };
 
+const express = require("express");
+const app = express();
+
 const rateLimiterConnection = new RateLimiterMemory(ConnectionOptionsRateLimit);
 
-
 const server = http.createServer();
-const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true });
+
+const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true, proxy: true });
+
+app.set('trust proxy', true);
+
 
 let connectedClientsCount = 0;
 
 
 const Limiter = require("limiter").RateLimiter;
 module.exports = { LZString, axios, Limiter, WebSocket, http };
-const express = require("express");
-const app = express();
+
+
 const bodyParser = require("body-parser");
 const { sendBatchedMessages, joinRoom, closeRoom, handleRequest } = require('./room');
 const { increasePlayerDamage, increasePlayerKills, increasePlayerPlace, increasePlayerWins } = require('./dbrequests');
@@ -47,8 +53,6 @@ app.use(limiter);
 
 app.use(cors());
 app.use(bodyParser.json());
-//app.set("trust proxy", ["loopback", "linklocal", "uniquelocal"]);
-app.set("trust proxy", true);
 
 const MAX_REQUEST_SIZE = 1700;
 const MAX_PARAM_BODY_LENGTH = 100;
@@ -153,11 +157,11 @@ function isValidOrigin(origin) {
 }
 
 wss.on("connection", (ws, req) => {
-  rateLimiterConnection.consume(req.socket.remoteAddress)
+  rateLimiterConnection.consume(req.headers['x-forwarded-for'] )
    
     .then(() => {
       const token = req.url.slice(1);
-       const ip = req.socket.remoteAddress;
+       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
        console.log('Client connected from IP:', ip);
 
       const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
