@@ -1,15 +1,15 @@
 const batchedMessages = new Map();
 const rooms = new Map();
 
-const server_tick_rate = 16;
+const server_tick_rate = 33;
 const WORLD_WIDTH = 800;
 const WORLD_HEIGHT = 800;
-const playerspeed = 0.4;
+const playerspeed = 0.8;
 const SHOOT_COOLDOWN = 100; 
 const BULLET_DAMAGE = 5;
 const game_start_time = 1000;
 const game_win_rest_time = 10000;
-const max_room_players = 1;
+const max_room_players = 2;
 const maxClients = 100;
 
 const playerHitboxWidth = 60; 
