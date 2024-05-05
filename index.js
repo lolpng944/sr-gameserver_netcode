@@ -13,7 +13,7 @@ const ConnectionOptionsRateLimit = {
 
 const rateLimiterConnection = new RateLimiterMemory(ConnectionOptionsRateLimit);
 
-const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true, proxy: true });
+const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true });
 const server = http.createServer();
 
 let connectedClientsCount = 0;
