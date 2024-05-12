@@ -2,6 +2,7 @@ const { LZString, axios, Limiter } = require('./index.js');
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { startDecreasingHealth, startRegeneratingHealth } = require('./match-modifiers')
+const { UseZone, printZone } = require('./zone')
 
 const {
   server_tick_rate,
@@ -23,6 +24,8 @@ function closeRoom(roomId) {
   const room = rooms.get(roomId);
   if (room) {
     clearInterval(room.intervalId); // Clear the interval associated with the room
+    clearInterval(room.shrinkInterval);
+     clearInterval(room.zonefulldamage);
     rooms.delete(roomId); // Remove the room from the rooms map
     console.log(`Room ${roomId} closed.`);
   } else {
@@ -68,8 +71,9 @@ async function joinRoom(ws, token) {
           room = availableRoom;
         } else {
           roomId = `room_${rooms.size + 1}`;
-          room = createRoom(roomId);
-        }
+          room = createRoom(roomId, WORLD_HEIGHT, WORLD_WIDTH);
+          }
+        
 
         function createRateLimiter() {
           const rate = 50; // Allow one request every 50 milliseconds
@@ -134,6 +138,7 @@ async function joinRoom(ws, token) {
           
           //startDecreasingHealth(room, 1);
           startRegeneratingHealth(room, 1);
+          UseZone(room);
         }
 
         // Set timeout to disconnect player after 5 minutes of inactivity
@@ -255,14 +260,21 @@ function broadcastPlayerPositions(room) {
     player.ws.send(JSON.stringify(message));
   });
 }
+const halfWorldHeight = WORLD_HEIGHT;
+const halfWorldWidth = WORLD_WIDTH;
 
-
-function createRoom(roomId) {
+function createRoom(roomId, height, width) {
   const room = {
     players: new Map(),
     state: "waiting", // Possible values: "waiting", "playing"
     winner: 0,
     eliminatedPlayers: [],
+    zoneStartX: -width, // Example start X coordinate (100 
+    zoneStartY: -height, // Example start Y coordinate (100 
+    zoneEndX: width,  // Example end X coordinate (100 units 
+    zoneEndY: height,
+    mapHeight: height,
+    mapWidth: width,
   };
 
   rooms.set(roomId, room);
