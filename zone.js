@@ -39,7 +39,7 @@ function shrinkZone(room) {
     } else {
         console.log("Zone cannot shrink further.");
         clearInterval(room.shrinkInterval);
-         room.zonefulldamage = setInterval(() => dealDamage(room), 500);
+         room.zonefulldamage = setInterval(() => dealDamage(room), 1000);
     }
 }
 
@@ -69,9 +69,9 @@ function UseZone(room) {
   room.zoneEndX += 400
   room.zoneEndY += 400
   setTimeout(() => {
-    room.shrinkInterval = setInterval(() => shrinkZone(room), 1000);
+    room.shrinkInterval = setInterval(() => shrinkZone(room), 500);
     
-  }, 300);
+  }, 30000);
 
 }
 
