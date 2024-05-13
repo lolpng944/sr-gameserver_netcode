@@ -3,6 +3,7 @@ const { isRectIntersectingLine, isCollisionWithWalls, isCollisionWithTeleporters
 const { increasePlayerPlace, increasePlayerWins } = require('./dbrequests')
 const { endGame } = require('./game')
 const { player_idle_timeout } = require('./config')
+  const { handleCoinCollected } = require('./room')
 
 
 const {
@@ -87,7 +88,7 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
   
   if (collectedCoins.length > 0) {
     collectedCoins.forEach((index) => {
-      const { handleCoinCollected } = require('./room')
+    
       handleCoinCollected(result, index);
     });
   }
