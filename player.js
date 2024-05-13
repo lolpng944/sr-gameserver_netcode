@@ -2,6 +2,7 @@
 const { isRectIntersectingLine, isCollisionWithWalls, isCollisionWithTeleporters } = require('./collisions');
 const { increasePlayerPlace, increasePlayerWins } = require('./dbrequests')
 const { endGame } = require('./game')
+const { player_idle_timeout } = require('./config')
 
 
 const {
@@ -71,6 +72,7 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
   // Additional movement logic can be added here
 
   const collectedCoins = [];
+  if (result.room.coins) {
   result.room.coins.forEach((coin, index) => {
     const distance = Math.sqrt(
       Math.pow(player.x - coin.x, 2) + Math.pow(player.y - coin.y, 2),
@@ -80,6 +82,7 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
       collectedCoins.push(index);
     }
   });
+    }
 
   
   if (collectedCoins.length > 0) {
@@ -100,7 +103,7 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
       player.ws.close(4200, "disconnected_inactivity");
       result.room.players.delete(result.playerId);
     },
-    20 * 60 * 1000,
+    player_idle_timeout,
   ); // 5 minutes in milliseconds
 }
 

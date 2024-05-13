@@ -18,7 +18,7 @@ const rateLimiterConnection = new RateLimiterMemory(ConnectionOptionsRateLimit);
 
 const server = http.createServer();
 
-const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true, proxy: true });
+const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true, proxy: false });
 
 app.set('trust proxy', true);
 
@@ -161,14 +161,19 @@ wss.on("connection", (ws, req) => {
    
     .then(() => {
       const token = req.url.slice(1);
-       //const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-      // console.log('Client connected from IP:', ip);
+       const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+       console.log('Client connected from IP:', ip);
 
       const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
       console.log(origin);
 
       if (!isValidOrigin(origin)) {
         ws.close(4004, "Unauthorized");
+        return;
+      }
+
+      if (connectedClientsCount > maxClients) {
+        ws.close(4004, "code:full");
         return;
       }
 
@@ -181,7 +186,7 @@ wss.on("connection", (ws, req) => {
 
           connectedClientsCount++;
 
-          console.log("Joined room:", result);
+         // console.log("Joined room:", result);
   
 
       ws.on("message", (message) => {
@@ -198,7 +203,9 @@ wss.on("connection", (ws, req) => {
       ws.on("close", () => {
         connectedClientsCount--;
         const player = result.room.players.get(result.playerId);
-        clearInterval(player.moveInterval);
+        if (player) {
+          clearInterval(player.moveInterval);
+          }
 
         if (player && player.timeout) {
           clearTimeout(player.timeout);
@@ -223,17 +230,15 @@ wss.on("connection", (ws, req) => {
         }
 
         if (result.room.state === "playing" && result.room.winner === 0) {
-          console.log(result.room.winner);
+
           let remainingPlayers1 = Array.from(
             result.room.players.values(),
           ).filter((player) => player.visible !== false);
-          console.log("yes im the problem" + result.room.winner);
+          
           if (remainingPlayers1.length === 1 && result.room.winner === 0) {
             const winner = remainingPlayers1[0];
             result.room.winner = winner.playerId;
-            console.log(
-              `Last player standing! ${winner.playerId} wins! comes from closing`,
-            );
+
             increasePlayerWins(winner.playerId, 1);
             increasePlayerPlace(winner.playerId, 1);
             console.log("no this plz not");

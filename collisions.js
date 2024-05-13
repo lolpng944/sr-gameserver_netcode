@@ -80,7 +80,7 @@ console.log("Grid initialization completed");
 
 function isCollisionWithWalls(x, y) {
   // Filter only the walls that are within the threshold distance from (x, y)
-  const threshold = 1000;
+  const threshold = 40;
   let collisionDetected = false;
   const nearbyWalls = walls.filter((wall) => {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
@@ -111,8 +111,8 @@ function isCollisionWithWalls(x, y) {
     if (
       x + 20 > wallLeft &&
       x - 20 < wallRight &&
-      y + 50 > wallTop &&
-      y - 50 < wallBottom
+      y + 45 > wallTop &&
+      y - 45 < wallBottom
     ) {
       collisionDetected = true; // Collision detected
       break; 
@@ -200,7 +200,7 @@ function calculateBulletEndpoint(startX, startY, direction, length) {
 function adjustBulletEndpoint(room, bullet) {
   //const walls = room.walls; // Assuming room has a walls property containing wall data
 
-  const threshold = 200;
+  const threshold = 2000;
   const nearbyWalls = walls.filter((wall) => {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
     const closestX = Math.max(

@@ -1,4 +1,5 @@
 const { LZString, axios, Limiter } = require('./index.js');
+const { matchmaking_timeout } = require('./config.js');
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { startDecreasingHealth, startRegeneratingHealth } = require('./match-modifiers')
@@ -147,7 +148,7 @@ async function joinRoom(ws, token) {
             ws.close(4100, "matchmaking_timeout");
             room.players.delete(playerId);
           },
-          16 * 60 * 1000,
+          matchmaking_timeout,
         ); // 5 minutes in milliseconds
 
         // Assign the timeout ID to the player
@@ -212,16 +213,16 @@ function sendBatchedMessages(room) {
     return acc;
   }, {});
 
-  const bullets = batchedMessages
-    .get(room)
-    .filter((msg) => msg.type === "bullet");
+  //const bullets = batchedMessages
+   // .get(room)
+    //.filter((msg) => msg.type === "bullet");
 
   const newMessage = {
-    playerData,
-    coins: room.coins,
-    bullets,
-    state: room.state,
-    eliminatedPlayers: room.eliminatedPlayers,
+      ...playerData ? { playerData } : {},
+      coins: room.coins,
+      state: room.state,
+      z: room.zone,
+      ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
   };
 
   const jsonString = JSON.stringify(newMessage);
@@ -278,7 +279,7 @@ function createRoom(roomId, height, width) {
   };
 
   rooms.set(roomId, room);
-  generateRandomCoins(room);
+  //generateRandomCoins(room);
 
   const intervalId = setInterval(() => {
     // Assuming you have a function sendBatchedMessages that takes a room object as an argument
