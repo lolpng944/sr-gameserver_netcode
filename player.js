@@ -17,10 +17,61 @@ const {
     playerHitboxHeight,
 } = require('./config');
 
-
-
-
 function handleMovement(result, player) {
+  const deltaTime = player.lastProcessedPosition !== undefined ? 20 : 0;
+
+  const finalDirection = player.moving
+    ? player.direction - 90
+    : player.direction;
+
+  const radians = (finalDirection * Math.PI) / 180;
+  const xDelta = playerspeed * deltaTime * Math.cos(radians);
+  const yDelta = playerspeed * deltaTime * Math.sin(radians);
+
+  const newX = Math.round(player.x + xDelta);
+  const newY = Math.round(player.y + yDelta);
+
+  const interpolatedPositions = interpolate(player, { x: newX, y: newY });
+
+  interpolatedPositions.forEach(({ x, y }) => {
+    if (!isCollisionWithWalls(x, y, player.x, player.y)) {
+      player.x = x;
+      player.y = y;
+
+      player.lastProcessedPosition = { x, y };
+    }
+  });
+
+  player.x = Math.max(-WORLD_WIDTH, Math.min(WORLD_WIDTH, player.x));
+  player.y = Math.max(-WORLD_HEIGHT, Math.min(WORLD_HEIGHT, player.y));
+
+  clearTimeout(player.timeout);
+
+  player.timeout = setTimeout(() => {
+    player.ws.close(4200, "disconnected_inactivity");
+    result.room.players.delete(result.playerId);
+  }, player_idle_timeout);
+}
+
+function interpolate(player, nextPosition) {
+  const interpolatedPositions = [];
+  const steps = 10; // Adjust this value for smoother or faster movement
+
+  for (let i = 1; i <= steps; i++) {
+    const fraction = i / steps;
+    const x = player.x + (nextPosition.x - player.x) * fraction;
+    const y = player.y + (nextPosition.y - player.y) * fraction;
+    interpolatedPositions.push({ x, y });
+  }
+
+  return interpolatedPositions;
+}
+
+
+
+
+
+function handleM4ovement(result, player) {
 const deltaTime = player.lastProcessedPosition !== undefined ? 20 : 0;
 
 const finalDirection = player.moving
