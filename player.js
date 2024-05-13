@@ -40,39 +40,11 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
 
   player.lastProcessedPosition = { x: newX, y: newY };
 } else {
-  // Collision resolution
-  // Move the player back to their previous position
   player.x = player.lastProcessedPosition.x;
   player.y = player.lastProcessedPosition.y;
 }
 
- /* if (isCollisionWithTeleporters(newX, newY)) {
-     const collidedTeleporter = teleporters.find((teleporter) => {
-       return (
-         player.x + 60 > teleporter.x - teleporter.width / 2 &&
-         player.x < teleporter.x + teleporter.width / 2 &&
-         player.y + 300 > teleporter.y - teleporter.height / 2 &&
-         player.y < teleporter.y + teleporter.height / 2
-      ); 
-     });
-
-     // If a teleporter was found
-     if (collidedTeleporter) {
-       // Teleport the player to the destination of the collided teleporter
-       player.x = collidedTeleporter.destination.x;
-       player.y = collidedTeleporter.destination.y;
-     }
-    }
-    */
-     
-    
-  
-
- 
-
-  // Additional movement logic can be added here
-
-  const collectedCoins = [];
+/*  const collectedCoins = [];
   if (result.room.coins) {
   result.room.coins.forEach((coin, index) => {
     const distance = Math.sqrt(
@@ -92,6 +64,7 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
       handleCoinCollected(result, index);
     });
   }
+  */
 
   player.x = Math.max(-WORLD_WIDTH, Math.min(WORLD_WIDTH, player.x));
   player.y = Math.max(-WORLD_HEIGHT, Math.min(WORLD_HEIGHT, player.y));
