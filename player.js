@@ -3,7 +3,7 @@ const { isRectIntersectingLine, isCollisionWithWalls, isCollisionWithTeleporters
 const { increasePlayerPlace, increasePlayerWins } = require('./dbrequests')
 const { endGame } = require('./game')
 const { player_idle_timeout } = require('./config')
-  const { handleCoinCollected } = require('./room')
+  //const { handleCoinCollected } = require('./room')
 
 
 const {
@@ -55,7 +55,7 @@ function handleMovement(result, player) {
 
 function interpolate(player, nextPosition) {
   const interpolatedPositions = [];
-  const steps = 10; // Adjust this value for smoother or faster movement
+  const steps = 30; // Adjust this value for smoother or faster movement
 
   for (let i = 1; i <= steps; i++) {
     const fraction = i / steps;
@@ -71,7 +71,7 @@ function interpolate(player, nextPosition) {
 
 
 
-function handleM4ovement(result, player) {
+function handleM34ovement(result, player) {
 const deltaTime = player.lastProcessedPosition !== undefined ? 20 : 0;
 
 const finalDirection = player.moving
