@@ -51,8 +51,10 @@ function dealDamage(room) {
            handleElimination(room, player);
                
         } else {
+                if (room.winner === 0) {
             player.health -= 5;
             player.last_hit_time = new Date().getTime();
+                }
                  }
 }
         } else {
