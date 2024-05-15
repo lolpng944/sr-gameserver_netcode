@@ -55,7 +55,7 @@ function handleMovement(result, player) {
 
 function interpolate(player, nextPosition) {
   const interpolatedPositions = [];
-  const steps = 30; // Adjust this value for smoother or faster movement
+  const steps = 50; // Adjust this value for smoother or faster movement
 
   for (let i = 1; i <= steps; i++) {
     const fraction = i / steps;
