@@ -13,7 +13,7 @@ function isWithinZone(room, playerX, playerY) {
     return playerX - 40 >= room.zoneStartX && playerX + 40 <= room.zoneEndX &&
            playerY - 60  >= room.zoneStartY && playerY + 60 <= room.zoneEndY;
 }
-shrinkspeed = 3 / 1000
+shrinkspeed = 1.5 / 1000
 // Function to shrink the game zone
 function shrinkZone(room) {
     dealDamage(room);
@@ -32,7 +32,7 @@ function shrinkZone(room) {
     room.zone = room.zoneStartX + "," + room.zoneStartY
         setTimeout(() => {
             room.zone = undefined;
-          }, 200);
+          }, 100);
 
 
       //  console.log(room.zoneEndX, room.zoneEndY);
@@ -52,7 +52,7 @@ function dealDamage(room) {
                
         } else {
                 if (room.winner === 0) {
-            player.health -= 5;
+            player.health -= 2;
             player.last_hit_time = new Date().getTime();
                 }
                  }

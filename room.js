@@ -229,8 +229,10 @@ function sendBatchedMessages(room) {
   const compressedString = LZString.compressToUint8Array(jsonString);
 
   if (room.lastSentMessage !== jsonString) {
+    console.log(`sender`);
     room.players.forEach((player) => {
       player.ws.send(compressedString, { binary: true });
+      
     });
 
     room.lastSentMessage = jsonString;
@@ -282,13 +284,20 @@ function createRoom(roomId, height, width) {
   //generateRandomCoins(room);
 
   const intervalId = setInterval(() => {
-    // Assuming you have a function sendBatchedMessages that takes a room object as an argument
-    sendBatchedMessages(room);
-   
+    sendBatchedMessages(room);   
   }, server_tick_rate);
 
-  // Store the interval ID with the room for later cleanup
   room.intervalId = intervalId;
+
+  setTimeout(() => {
+    closeRoom(roomId); 
+    room.players.forEach((player) => {
+    player.ws.close(4370, "server_runs_too_long");
+    });
+  
+    console.log(`Room ${roomId} closed.`);
+  }, 10 * 60 * 1000); // 10 minutes in milliseconds
+
 
   return room;
 }
@@ -424,7 +433,9 @@ function handleRequest(result, message) {
             // Check if the player should move
             if (data.moving === "true") {
               // Set the shouldMove flag to true
+               if (!player.moving === true) {
               player.moving = true;
+                 }
             } else if (data.moving === "false") {
               // If not moving, set the shouldMove flag to false
               player.moving = false;
@@ -436,6 +447,7 @@ function handleRequest(result, message) {
 
             // Set up a new interval to move the player every 50 milliseconds
             if (!player.moveInterval) {
+             
               player.moveInterval = setInterval(() => {
                 // Check the shouldMove flag before moving
                 if (player.moving) {

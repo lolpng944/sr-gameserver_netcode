@@ -29,7 +29,7 @@ const data = [{"x":-750,"y":800},{"x":700,"y":800},{"x":750,"y":800},{"x":-800,"
 
 const normalArray = data.map(({ x, y }) => ({ x, y }));
 
-console.log(normalArray);
+//console.log(normalArray);
 
 const wall1s = [
   { x: 150, y: 50 },
@@ -47,7 +47,7 @@ const wall1s = [
 const walls = normalArray
 const wallsJSON = JSON.stringify(walls);
 // Print the JSON representation
-console.log(wallsJSON);
+//console.log(wallsJSON);
 
 
 const teleporters = [

@@ -24,6 +24,7 @@ app.set('trust proxy', true);
 
 
 let connectedClientsCount = 0;
+let connectedUsernames = [];
 
 
 const Limiter = require("limiter").RateLimiter;
@@ -177,6 +178,8 @@ wss.on("connection", (ws, req) => {
         return;
       }
 
+    
+
       joinRoom(ws, token)
         .then((result) => {
           if (!result) {
@@ -184,7 +187,14 @@ wss.on("connection", (ws, req) => {
             return;
           }
 
+         if (connectedUsernames.includes(result.playerId)) {
+          ws.close(4005, "code:double");
+          return;
+         }
+
           connectedClientsCount++;
+          connectedUsernames.push(result.playerId);
+
 
          // console.log("Joined room:", result);
   
@@ -201,8 +211,13 @@ wss.on("connection", (ws, req) => {
       });
 
       ws.on("close", () => {
-        connectedClientsCount--;
         const player = result.room.players.get(result.playerId);
+        connectedClientsCount--;
+        const index = connectedUsernames.indexOf(player.playerId);
+        if (index !== -1) {
+            connectedUsernames.splice(index, 1);
+          
+        
         if (player) {
           clearInterval(player.moveInterval);
           }
@@ -256,6 +271,7 @@ wss.on("connection", (ws, req) => {
             return;
           }
         }
+          }
    
       });
 })
