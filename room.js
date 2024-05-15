@@ -426,23 +426,20 @@ function handleRequest(result, message) {
         const validDirection = parseFloat(data.direction);
 
         if (!isNaN(validDirection)) {
+          player.direction = validDirection;
           if (player) {
             // Update the player direction based on input
             player.direction = validDirection;
 
-            // Check if the player should move
             if (data.moving === "true") {
               // Set the shouldMove flag to true
-              // if (!player.moving === true) {
               player.moving = true;
-                // }
             } else if (data.moving === "false") {
               // If not moving, set the shouldMove flag to false
               player.moving = false;
             } else {
               console.warn("Invalid 'moving' value:", data.moving);
             }
-
             // Clear the existing interval
 
             // Set up a new interval to move the player every 50 milliseconds
