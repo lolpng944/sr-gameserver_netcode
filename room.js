@@ -433,9 +433,9 @@ function handleRequest(result, message) {
             // Check if the player should move
             if (data.moving === "true") {
               // Set the shouldMove flag to true
-               if (!player.moving === true) {
+              // if (!player.moving === true) {
               player.moving = true;
-                 }
+                // }
             } else if (data.moving === "false") {
               // If not moving, set the shouldMove flag to false
               player.moving = false;
