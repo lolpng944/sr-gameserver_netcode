@@ -163,10 +163,10 @@ wss.on("connection", (ws, req) => {
     .then(() => {
       const token = req.url.slice(1);
        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-       console.log('Client connected from IP:', ip);
+       //console.log('Client connected from IP:', ip);
 
       const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
-      console.log(origin);
+      //console.log(origin);
 
       if (!isValidOrigin(origin)) {
         ws.close(4004, "Unauthorized");
