@@ -13,7 +13,7 @@ function isWithinZone(room, playerX, playerY) {
     return playerX - 40 >= room.zoneStartX && playerX + 40 <= room.zoneEndX &&
            playerY - 60  >= room.zoneStartY && playerY + 60 <= room.zoneEndY;
 }
-shrinkspeed = 3 / 1000
+shrinkspeed = 1.5 / 1000
 // Function to shrink the game zone
 function shrinkZone(room) {
     dealDamage(room);
@@ -73,7 +73,7 @@ function UseZone(room) {
   setTimeout(() => {
     room.shrinkInterval = setInterval(() => shrinkZone(room), 500);
     
-  }, 30000);
+  }, 300);
 
 }
 

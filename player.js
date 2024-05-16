@@ -31,29 +31,29 @@ function handleMovement(result, player) {
   const newX = Math.round(player.x + xDelta);
   const newY = Math.round(player.y + yDelta);
 
-/*const interpolatedPositions = interpolate(player, { x: newX, y: newY });
+  /*const interpolatedPositions = interpolate(player, { x: newX, y: newY });
 
- interpolatedPositions.forEach(({ x, y }) => {
-  if (!isCollisionWithWalls(x, y, player.x, player.y)) {
-      player.x = x;
-      player.y = y;
+   interpolatedPositions.forEach(({ x, y }) => {
+    if (!isCollisionWithWalls(x, y, player.x, player.y)) {
+        player.x = x;
+        player.y = y;
 
-     player.lastProcessedPosition = { x, y };
+       player.lastProcessedPosition = { x, y };
+    }
+    });
+    */
+
+    if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
+    player.x = newX;
+    player.y = newY;
+
+    player.lastProcessedPosition = { x: newX, y: newY };
+  } else {
+    // Collision resolution
+    // Move the player back to their previous position
+    player.x = player.lastProcessedPosition.x;
+    player.y = player.lastProcessedPosition.y;
   }
-  });
-  */
-
-  if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
-  player.x = newX;
-  player.y = newY;
-
-  player.lastProcessedPosition = { x: newX, y: newY };
-} else {
-  // Collision resolution
-  // Move the player back to their previous position
-  player.x = player.lastProcessedPosition.x;
-  player.y = player.lastProcessedPosition.y;
-}
 
   player.x = Math.max(-WORLD_WIDTH, Math.min(WORLD_WIDTH, player.x));
   player.y = Math.max(-WORLD_HEIGHT, Math.min(WORLD_HEIGHT, player.y));
@@ -68,7 +68,7 @@ function handleMovement(result, player) {
 
 function interpolate(player, nextPosition) {
   const interpolatedPositions = [];
-  const steps = 50; // Adjust this value for smoother or faster movement
+  const steps = 30; // Adjust this value for smoother or faster movement
 
   for (let i = 1; i <= steps; i++) {
     const fraction = i / steps;
