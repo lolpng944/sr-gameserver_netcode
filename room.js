@@ -22,7 +22,7 @@ const {
 
 
 function closeRoom(roomId) {
-  const room = rooms.get(roomId);
+  const room = roomId;
   if (room) {
     clearInterval(room.intervalId); // Clear the interval associated with the room
     clearInterval(room.shrinkInterval);
