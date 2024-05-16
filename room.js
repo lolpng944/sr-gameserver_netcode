@@ -22,7 +22,7 @@ const {
 
 
 function closeRoom(roomId) {
-  const room = roomId;
+  const room = rooms.get(roomId);
   if (room) {
     clearInterval(room.intervalId); // Clear the interval associated with the room
     clearInterval(room.shrinkInterval);
@@ -74,7 +74,7 @@ async function joinRoom(ws, token) {
           roomId = `room_${rooms.size + 1}`;
           room = createRoom(roomId, WORLD_HEIGHT, WORLD_WIDTH);
           }
-        
+
 
         function createRateLimiter() {
           const rate = 50; // Allow one request every 50 milliseconds
@@ -136,7 +136,7 @@ async function joinRoom(ws, token) {
 
             // Create a new batch message for players in the room
           }, game_start_time);
-          
+
           //startDecreasingHealth(room, 1);
           startRegeneratingHealth(room, 1);
           UseZone(room);
@@ -232,7 +232,7 @@ function sendBatchedMessages(room) {
     console.log(`sender`);
     room.players.forEach((player) => {
       player.ws.send(compressedString, { binary: true });
-      
+
     });
 
     room.lastSentMessage = jsonString;
@@ -294,7 +294,7 @@ function createRoom(roomId, height, width) {
     room.players.forEach((player) => {
     player.ws.close(4370, "server_runs_too_long");
     });
-  
+
     console.log(`Room ${roomId} closed.`);
   }, 10 * 60 * 1000); // 10 minutes in milliseconds
 
@@ -426,25 +426,28 @@ function handleRequest(result, message) {
         const validDirection = parseFloat(data.direction);
 
         if (!isNaN(validDirection)) {
-          player.direction = validDirection;
           if (player) {
             // Update the player direction based on input
             player.direction = validDirection;
 
+            // Check if the player should move
             if (data.moving === "true") {
               // Set the shouldMove flag to true
+               if (!player.moving === true) {
               player.moving = true;
+                 }
             } else if (data.moving === "false") {
               // If not moving, set the shouldMove flag to false
               player.moving = false;
             } else {
               console.warn("Invalid 'moving' value:", data.moving);
             }
+
             // Clear the existing interval
 
             // Set up a new interval to move the player every 50 milliseconds
             if (!player.moveInterval) {
-             
+
               player.moveInterval = setInterval(() => {
                 // Check the shouldMove flag before moving
                 if (player.moving) {
@@ -477,5 +480,5 @@ module.exports = {
   generateRandomCoins,
   handleRequest,
   closeRoom
- 
+
 };
