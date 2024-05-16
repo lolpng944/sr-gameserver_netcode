@@ -159,14 +159,14 @@ function isValidOrigin(origin) {
 
 wss.on("connection", (ws, req) => {
   rateLimiterConnection.consume(req.headers['x-forwarded-for'] )
-   
+
     .then(() => {
       const token = req.url.slice(1);
        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-       //console.log('Client connected from IP:', ip);
+       console.log('Client connected from IP:', ip);
 
       const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
-      //console.log(origin);
+      console.log(origin);
 
       if (!isValidOrigin(origin)) {
         ws.close(4004, "Unauthorized");
@@ -178,7 +178,7 @@ wss.on("connection", (ws, req) => {
         return;
       }
 
-    
+
 
       joinRoom(ws, token)
         .then((result) => {
@@ -197,7 +197,7 @@ wss.on("connection", (ws, req) => {
 
 
          // console.log("Joined room:", result);
-  
+
 
       ws.on("message", (message) => {
         if (result.room.players.has(result.playerId)) {
@@ -210,89 +210,14 @@ wss.on("connection", (ws, req) => {
         }
       });
 
-          ws.on("close", () => {
-            const player = result.room.players.get(result.playerId);
-
-            if (player) {
-                clearInterval(player.moveInterval);
-
-                if (player.timeout) {
-                    clearTimeout(player.timeout);
-                }
-
-                if (player.damage > 0) {
-                    increasePlayerDamage(player.playerId, player.damage);
-                }
-
-                if (player.kills > 0) {
-                    increasePlayerKills(player.playerId, player.kills);
-                }
-            }
-
-            if (player && connectedUsernames.includes(player.playerId)) {
-                connectedUsernames.splice(connectedUsernames.indexOf(player.playerId), 1);
-            }
-
-            if (result.room.players.has(result.playerId)) {
-                result.room.players.delete(result.playerId);
-            }
-
-            connectedClientsCount--;
-
-            if (result.room.players.size === 0) {
-                closeRoom(result.roomId);
-                console.log(`Room ${result.roomId} closed`);
-                return; // Exit early if the room is empty
-            }
-
-            if (result.room.state === "playing" && result.room.winner === 0) {
-                const remainingPlayers = Array.from(result.room.players.values())
-                    .filter((player) => player.visible !== false);
-
-                if (remainingPlayers.length === 1) {
-                    const winner = remainingPlayers[0];
-                    result.room.winner = winner.playerId;
-
-                    increasePlayerWins(winner.playerId, 1);
-                    increasePlayerPlace(winner.playerId, 1);
-                    console.log("Game ended with winner:", winner.playerId);
-                    result.room.eliminatedPlayers.push({
-                        username: winner.playerId,
-                        place: 1,
-                    });
-
-                    setTimeout(() => {
-                        endGame(result.room);
-                    }, game_win_rest_time);
-
-                    return;
-                }
-            }
-          })
-          .catch((error) => {
-            console.error("Error during joinRoom:", error);
-            ws.close(4001, "Token verification error");
-          })
-          .catch(() => {
-            // Rate limit exceeded
-            ws.close(4003, "Connection limit reached");
-          });
-           });
-       });
-   });
- 
-
-
-
-     /* ws.on("close", () => {
+      ws.on("close", () => {
         const player = result.room.players.get(result.playerId);
         connectedClientsCount--;
         const index = connectedUsernames.indexOf(player.playerId);
         if (index !== -1) {
             connectedUsernames.splice(index, 1);
-          
-          
-        
+
+
         if (player) {
           clearInterval(player.moveInterval);
           }
@@ -324,7 +249,7 @@ wss.on("connection", (ws, req) => {
           let remainingPlayers1 = Array.from(
             result.room.players.values(),
           ).filter((player) => player.visible !== false);
-          
+
           if (remainingPlayers1.length === 1 && result.room.winner === 0) {
             const winner = remainingPlayers1[0];
             result.room.winner = winner.playerId;
@@ -347,10 +272,10 @@ wss.on("connection", (ws, req) => {
           }
         }
           }
-   
+
       });
 })
-    
+
       .catch((error) => {
                 console.error("Error during joinRoom:", error);
                 ws.close(4001, "Token verification error");
@@ -361,8 +286,6 @@ wss.on("connection", (ws, req) => {
             ws.close(4003, "Connection limit reached");
           });
       });
-
-      */
 
 
 server.on("upgrade", (request, socket, head) => {
