@@ -216,6 +216,7 @@ wss.on("connection", (ws, req) => {
         const index = connectedUsernames.indexOf(player.playerId);
         if (index !== -1) {
             connectedUsernames.splice(index, 1);
+          }
           
         
         if (player) {
