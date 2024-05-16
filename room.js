@@ -229,7 +229,7 @@ function sendBatchedMessages(room) {
   const compressedString = LZString.compressToUint8Array(jsonString);
 
   if (room.lastSentMessage !== jsonString) {
-    console.log(`sender`);
+   // console.log(`sender`);
     room.players.forEach((player) => {
       player.ws.send(compressedString, { binary: true });
 
