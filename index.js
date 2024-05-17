@@ -173,8 +173,8 @@ wss.on("connection", (ws, req) => {
         return;
       }
 
-      if (connectedClientsCount > maxClients) {
-        ws.close(4004, "code:full");
+    if (connectedClientsCount > maxClients) {
+      ws.close(4004, "code:full");
         return;
       }
 
@@ -187,10 +187,10 @@ wss.on("connection", (ws, req) => {
             return;
           }
 
-        if (connectedUsernames.includes(result.playerId)) {
-       ws.close(4005, "code:double");
-        return;
-        }
+    // if (connectedUsernames.includes(result.playerId)) {
+      // ws.close(4005, "code:double");
+        //return;
+        //}
 
           connectedClientsCount++;
           connectedUsernames.push(result.playerId);
