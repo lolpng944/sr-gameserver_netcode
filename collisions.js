@@ -205,11 +205,11 @@ function adjustBulletEndpoint(room, bullet) {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
     const closestX = Math.max(
       wall.x - wallblocksize,
-      Math.min(bullet.startX, wall.x + wallblocksize / 2),
+      Math.min(bullet.startX, wall.x + wallblocksize + 1 / 2),
     );
     const closestY = Math.max(
       wall.y - wallblocksize,
-      Math.min(bullet.startY, wall.y + wallblocksize / 2),
+      Math.min(bullet.startY, wall.y + wallblocksize + 1 / 2),
     );
     const distanceX = bullet.startX - closestX;
     const distanceY = bullet.startY - closestY;
