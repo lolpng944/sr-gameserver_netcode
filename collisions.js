@@ -198,18 +198,18 @@ function calculateBulletEndpoint(startX, startY, direction, length) {
 */
 
 function adjustBulletEndpoint(room, bullet) {
-  //const walls = room.walls; // Assuming room has a walls property containing wall data
+ // const walls = room.walls; // Assuming room has a walls property containing wall data
 
   const threshold = 800;
   const nearbyWalls = walls.filter((wall) => {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
     const closestX = Math.max(
-      wall.x - wallblocksize,
-      Math.min(bullet.startX, wall.x + wallblocksize),
+      wall.x - wallblocksize / 2,
+      Math.min(bullet.startX, wall.x + wallblocksize / 2)
     );
     const closestY = Math.max(
-      wall.y - wallblocksize,
-      Math.min(bullet.startY, wall.y + wallblocksize),
+      wall.y - wallblocksize / 2,
+      Math.min(bullet.startY, wall.y + wallblocksize / 2)
     );
     const distanceX = bullet.startX - closestX;
     const distanceY = bullet.startY - closestY;
@@ -217,6 +217,9 @@ function adjustBulletEndpoint(room, bullet) {
 
     return distance < threshold;
   });
+
+  let closestIntersection = null;
+  let minDistance = Infinity;
 
   for (const wall of nearbyWalls) {
     const wallLeft = wall.x - wallblocksize / 2;
@@ -233,22 +236,32 @@ function adjustBulletEndpoint(room, bullet) {
       wallLeft,
       wallTop,
       wallblocksize,
-      wallblocksize,
+      wallblocksize
     );
 
-    // If there's an intersection, adjust the bullet's endpoint
+    // If there's an intersection, check if it's the closest one
     if (intersection) {
-      bullet.endX = intersection.x;
-      bullet.endY = intersection.y;
-      break; // Exit loop since bullet can only hit one wall
+      const distanceToIntersection = Math.sqrt(
+        (intersection.x - bullet.startX) * (intersection.x - bullet.startX) +
+        (intersection.y - bullet.startY) * (intersection.y - bullet.startY)
+      );
+
+      if (distanceToIntersection < minDistance) {
+        minDistance = distanceToIntersection;
+        closestIntersection = intersection;
+      }
     }
+  }
+
+  // Adjust the bullet's endpoint if a closest intersection was found
+  if (closestIntersection) {
+    bullet.endX = closestIntersection.x;
+    bullet.endY = closestIntersection.y;
   }
 }
 
-
 // Function to calculate intersection point between a line and a rectangle
 function lineRectIntersection(x1, y1, x2, y2, rx, ry, rw, rh) {
-  
   const dx = x2 - x1;
   const dy = y2 - y1;
   const p = [-dx, dx, -dy, dy];
