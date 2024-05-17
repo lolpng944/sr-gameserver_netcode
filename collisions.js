@@ -200,16 +200,16 @@ function calculateBulletEndpoint(startX, startY, direction, length) {
 function adjustBulletEndpoint(room, bullet) {
   //const walls = room.walls; // Assuming room has a walls property containing wall data
 
-  const threshold = 200;
+  const threshold = 800;
   const nearbyWalls = walls.filter((wall) => {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
     const closestX = Math.max(
       wall.x - wallblocksize,
-      Math.min(bullet.startX, wall.x + wallblocksize + 1 / 2),
+      Math.min(bullet.startX, wall.x + wallblocksize),
     );
     const closestY = Math.max(
       wall.y - wallblocksize,
-      Math.min(bullet.startY, wall.y + wallblocksize + 1 / 2),
+      Math.min(bullet.startY, wall.y + wallblocksize),
     );
     const distanceX = bullet.startX - closestX;
     const distanceY = bullet.startY - closestY;
