@@ -52,7 +52,7 @@ async function joinRoom(ws, token) {
       let room;
 
 
-      if (response.data.message && !connectedUsernames.includes(response.data.message)) {
+      if (response.data.message) {
         for (const [id, currentRoom] of rooms) {
           if (currentRoom.players.size < 1) {
             roomId = id || "room_1";
