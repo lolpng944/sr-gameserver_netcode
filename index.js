@@ -28,7 +28,7 @@ let connectedUsernames = [];
 
 
 const Limiter = require("limiter").RateLimiter;
-module.exports = { LZString, axios, Limiter, WebSocket, http };
+module.exports = { LZString, axios, Limiter, WebSocket, http, connectedUsernames };
 
 
 const bodyParser = require("body-parser");
@@ -187,10 +187,10 @@ wss.on("connection", (ws, req) => {
             return;
           }
 
-         if (connectedUsernames.includes(result.playerId)) {
-          ws.close(4005, "code:double");
-          return;
-         }
+        if (connectedUsernames.includes(result.playerId)) {
+       ws.close(4005, "code:double");
+        return;
+        }
 
           connectedClientsCount++;
           connectedUsernames.push(result.playerId);
@@ -213,9 +213,12 @@ wss.on("connection", (ws, req) => {
       ws.on("close", () => {
         const player = result.room.players.get(result.playerId);
         connectedClientsCount--;
+        if (player && player.playerId) {
         const index = connectedUsernames.indexOf(player.playerId);
         if (index !== -1) {
             connectedUsernames.splice(index, 1);
+           }
+          }
 
 
         if (player) {
@@ -273,7 +276,7 @@ wss.on("connection", (ws, req) => {
         }
           }
 
-      });
+      );
 })
 
       .catch((error) => {

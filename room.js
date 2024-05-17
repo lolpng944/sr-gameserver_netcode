@@ -2,6 +2,7 @@ const { LZString, axios, Limiter } = require('./index.js');
 const { matchmaking_timeout } = require('./config.js');
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
+const { connectedUsernames } = require('./index.js');
 const { startDecreasingHealth, startRegeneratingHealth } = require('./match-modifiers')
 const { UseZone, printZone } = require('./zone')
 
@@ -50,7 +51,8 @@ async function joinRoom(ws, token) {
       let roomId;
       let room;
 
-      if (response.data.message) {
+
+      if (response.data.message && !connectedUsernames.includes(response.data.message)) {
         for (const [id, currentRoom] of rooms) {
           if (currentRoom.players.size < 1) {
             roomId = id || "room_1";
@@ -229,7 +231,6 @@ function sendBatchedMessages(room) {
   const compressedString = LZString.compressToUint8Array(jsonString);
 
   if (room.lastSentMessage !== jsonString) {
-   // console.log(`sender`);
     room.players.forEach((player) => {
       player.ws.send(compressedString, { binary: true });
 
