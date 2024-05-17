@@ -214,7 +214,7 @@ wss.on("connection", (ws, req) => {
         const player = result.room.players.get(result.playerId);
         connectedClientsCount--;
         if (player && player.playerId) {
-        const index = connectedUsernames.indexOf(player.playerId);
+        const index = connectedUsernames.indexOf(result.playerId);
         if (index !== -1) {
             connectedUsernames.splice(index, 1);
            }
