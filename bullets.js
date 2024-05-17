@@ -29,6 +29,7 @@ function handleBulletFired(result, data) {
       endY: bulletEndpoint.y, // Corrected property name
       direction: radiansfinal,
       playerId: result.playerId,
+      gun: player.gun,
       // width: 50,
     };
 
