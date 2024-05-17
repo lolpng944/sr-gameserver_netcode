@@ -180,7 +180,7 @@ function handleBulletCollision(room, bullet) {
   )) {
     // Handle collision with the nearest player
     const shootingPlayer = room.players.get(bullet.playerId);
-    const GUN_BULLET_DAMAGE = guns_damage[shootingPlayer.gun];
+    const GUN_BULLET_DAMAGE = guns_damage[bullet.gun];
 
     // Update player's health
     nearestPlayer.health -= GUN_BULLET_DAMAGE;
