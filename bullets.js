@@ -43,7 +43,7 @@ function handleBulletFired(result, data) {
 
     // Start the update loop
 
-    const shootCooldown = weaponCooldowns[player.gun];
+    const shootCooldown = weaponCooldowns[bullet.gun];
 
     setTimeout(() => {
       player.shooting = false;
