@@ -2,9 +2,9 @@ const { calculateBulletEndpoint, adjustBulletEndpoint } = require('./collisions'
 const { handleBulletCollision } = require('./player');
 const { weaponCooldowns, weaponShootRange } = require('./config');
 
-function handleBulletFired(result, data) {
+function handleBulletFired(result, data, player) {
   const room = result.room;
-  const player = room.players.get(result.playerId);
+  //const player = room.players.get(result.playerId);
 
   // const currentTime = new Date().getTime();
   // const lastShootTime = player.lastShootTime || 0;
