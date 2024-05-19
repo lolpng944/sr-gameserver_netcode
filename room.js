@@ -130,11 +130,12 @@ async function joinRoom(ws, token) {
         if (room.state === "waiting" && room.players.size > max_room_players - 1) {
 
            setTimeout(() => {
+               room.state = "countdown";
           }, 2000);
 
           
           // Start the game
-          room.state = "countdown";
+        
 
           setTimeout(() => {
             room.state = "playing";
