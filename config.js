@@ -12,7 +12,7 @@ const SHOOT_COOLDOWN = 100;
 const BULLET_DAMAGE = 5;
 const game_start_time = 1000;
 const game_win_rest_time = 10000;
-const max_room_players = 2;
+const max_room_players = 5;
 const maxClients = 100;
 
 const playerHitboxWidth = 60; 
