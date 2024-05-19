@@ -129,7 +129,24 @@ async function joinRoom(ws, token) {
 
         if (room.state === "waiting" && room.players.size > max_room_players - 1) {
 
-           setTimeout(() => {
+            setTimeout(() => {
+        room.state = "countdown";
+        console.log("State changed to 'countdown'");
+
+        // Set another timeout for game_start_time milliseconds after countdown
+        setTimeout(() => {
+            room.state = "playing";
+            console.log("State changed to 'playing'");
+
+            // Start game mechanics
+            // startDecreasingHealth(room, 1);
+            startRegeneratingHealth(room, 1);
+            UseZone(room);
+        }, game_start_time);
+    }, 2000);
+}
+
+        /*   setTimeout(() => {
                room.state = "countdown";
           }, 2000);
 
@@ -146,6 +163,8 @@ async function joinRoom(ws, token) {
           startRegeneratingHealth(room, 1);
           UseZone(room);
         }
+
+        */
 
         // Set timeout to disconnect player after 5 minutes of inactivity
         const playerTimeout = setTimeout(
