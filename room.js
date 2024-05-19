@@ -390,7 +390,7 @@ function handleRequest(result, message) {
 
       if (data.type === "shoot") {
         player.shoot_direction = parseFloat(data.shoot_direction);
-        handleBulletFired(result, data);
+        handleBulletFired(result, data, player);
       }
 
       if (data.type === "switch_gun") {
