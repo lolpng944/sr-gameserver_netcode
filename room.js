@@ -128,15 +128,17 @@ async function joinRoom(ws, token) {
         });
 
         if (room.state === "waiting" && room.players.size > max_room_players - 1) {
+
+           setTimeout(() => {
+          }, 2000);
+
+          
           // Start the game
           room.state = "countdown";
 
           setTimeout(() => {
-            // Start the game after the delay
-
             room.state = "playing";
-
-            // Create a new batch message for players in the room
+            
           }, game_start_time);
 
           //startDecreasingHealth(room, 1);
