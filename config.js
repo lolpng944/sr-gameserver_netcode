@@ -75,6 +75,7 @@ const spawnPositions = [
   { x: 0, y: -700 },
   { x: 300, y: 300 },
   { x: 400, y: 400 },
+  { x: 400, y: 450 },
 ];
 
 module.exports = {
