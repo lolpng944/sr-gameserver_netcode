@@ -96,7 +96,12 @@ async function joinRoom(ws, token) {
         const top_color = response.data.top_color;
         const playerRateLimiter = createRateLimiter();
 
-        const spawnIndex = room.players.size;
+        let spawnIndex;
+       // const spawnIndex = room.players.size;
+         // Synchronize access to players map to handle simultaneous joins
+        const playerCount = room.players.size;
+        spawnIndex = playerCount % spawnPositions.length;
+
 
         room.players.set(playerId, {
           ws,
