@@ -31,11 +31,11 @@ function handleMovement(result, player) {
   const newX = Math.round(player.x + xDelta);
   const newY = Math.round(player.y + yDelta);
 
-  if (player.lastProcessedPosition === undefined || player.lastProcessedPosition === null) {
+/*  if (player.lastProcessedPosition === undefined || player.lastProcessedPosition === null) {
     player.lastProcessedPosition = { x: player.x, y: player.y };
-  }
+ }
 
-  /*const interpolatedPositions = interpolate(player, { x: newX, y: newY });
+  const interpolatedPositions = interpolate(player, { x: newX, y: newY });
 
    interpolatedPositions.forEach(({ x, y }) => {
     if (!isCollisionWithWalls(x, y, player.x, player.y)) {
