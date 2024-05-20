@@ -110,7 +110,7 @@ async function joinRoom(ws, token) {
           direction: null,
           prevX: 0,
           prevY: 0,
-          lastProcessedPosition: 0,
+          lastProcessedPosition: { x: spawnPositions[spawnIndex].x, y: spawnPositions[spawnIndex].y },
           playerId: playerId,
           rateLimiter: playerRateLimiter,
           hat: hat,
