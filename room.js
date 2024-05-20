@@ -132,8 +132,9 @@ async function joinRoom(ws, token) {
           gun: 1,
         });
 
+         console.log("Player added:", room.players.get(playerId));
+        
         if (room.state === "waiting" && room.players.size > max_room_players - 1) {
-
             setTimeout(() => {
         room.state = "countdown";
         console.log("State changed to 'countdown'");
