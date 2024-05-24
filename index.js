@@ -103,15 +103,18 @@ function isValidOrigin(origin) {
 wss.on("connection", (ws, req) => {
   rateLimiterConnection.consume(req.headers['x-forwarded-for'] )
       
-  
-  if (connectedClientsCount > maxClients) {
-      ws.close(4004, "code:full");
-        return;
-      }
 
 
 
-    then(() => {
+
+    .then(() => {
+
+      if (connectedClientsCount > maxClients) {
+        ws.close(4004, "code:full");
+          return;
+        }
+
+
       const token = req.url.slice(1);
        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
        console.log('Client connected from IP:', ip);
@@ -131,14 +134,15 @@ wss.on("connection", (ws, req) => {
             ws.close(4001, "Invalid token");
             return;
           }
-
-    // if (connectedUsernames.includes(result.playerId)) {
-      // ws.close(4005, "code:double");
-        //return;
-        //}
+          console.log("before closed", connectedUsernames);
+   if (connectedUsernames.includes(result.playerId)) {
+     ws.close(4006, "code:double");
+       return;
+        }
 
           connectedClientsCount++;
           connectedUsernames.push(result.playerId);
+          console.log(connectedUsernames);
 
 
          // console.log("Joined room:", result);
@@ -164,6 +168,8 @@ wss.on("connection", (ws, req) => {
             connectedUsernames.splice(index, 1);
            }
           }
+
+          console.log(connectedUsernames);
 
 
         if (player) {
@@ -204,7 +210,6 @@ wss.on("connection", (ws, req) => {
 
             increasePlayerWins(winner.playerId, 1);
             increasePlayerPlace(winner.playerId, 1);
-            console.log("no this plz not");
             result.room.eliminatedPlayers.push({
               username: winner.playerId,
               place: 1,
