@@ -22,7 +22,7 @@ const wss = new WebSocket.Server({
 noServer: true, 
 perMessageDeflate: true, 
 proxy: false,
-maxPayload: 1024 });
+maxPayload: 104 });
 
 app.set('trust proxy', true);
 
@@ -60,32 +60,13 @@ app.use(cors());
 app.use(bodyParser.json());
 
 
-
-
-
-
-let nextPlayerId = 1;
-
-
-
-
 function endGame(room) {
 
 
-  //   const player = room.players.get(playerId);
-  // Additional logic to end the game and close the room
   console.log("Game ended! Closing the room.");
-  // You can implement the logic to perform any cleanup or notify players about the end of the game.
 
-  // Close the WebSocket connections for all players in the room
   room.players.forEach((player) => {
-    // if (player.damage > 0)
-    //  IncreasePlayerDamage(player.playerId, player.damage);
-    //   }
-
-    // if (player.kills > 0)
-    // IncreasePlayerKills(player.playerId, player.kills);
-    //  }
+    
     const placelist = JSON.stringify(room.eliminatedPlayers);
 
     if (room.eliminatedPlayers) {
@@ -95,8 +76,6 @@ function endGame(room) {
     }
   });
 
-  // Remove the room
-  // rooms.delete(room.roomId);
 }
 
 // Remove the room
@@ -123,11 +102,6 @@ function isValidOrigin(origin) {
 
 wss.on("connection", (ws, req) => {
   rateLimiterConnection.consume(req.headers['x-forwarded-for'] )
-
-       if (req.url.slice(1).length > 200) {
-        ws.close(4004, "Unauthorized");
-        return;
-      }
 
     .then(() => {
       const token = req.url.slice(1);
