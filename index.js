@@ -102,6 +102,12 @@ function isValidOrigin(origin) {
 
 wss.on("connection", (ws, req) => {
   rateLimiterConnection.consume(req.headers['x-forwarded-for'] )
+      if (connectedClientsCount > maxClients) {
+      ws.close(4004, "code:full");
+        return;
+      }
+
+
 
     .then(() => {
       const token = req.url.slice(1);
@@ -115,12 +121,6 @@ wss.on("connection", (ws, req) => {
         ws.close(4004, "Unauthorized");
         return;
       }
-
-    if (connectedClientsCount > maxClients) {
-      ws.close(4004, "code:full");
-        return;
-      }
-
 
 
       joinRoom(ws, token)
