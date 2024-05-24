@@ -18,7 +18,11 @@ const rateLimiterConnection = new RateLimiterMemory(ConnectionOptionsRateLimit);
 
 const server = http.createServer();
 
-const wss = new WebSocket.Server({ noServer: true, perMessageDeflate: true, proxy: false });
+const wss = new WebSocket.Server({ 
+noServer: true, 
+perMessageDeflate: true, 
+proxy: false,
+maxPayload: 1024 });
 
 app.set('trust proxy', true);
 
@@ -55,47 +59,7 @@ app.use(limiter);
 app.use(cors());
 app.use(bodyParser.json());
 
-const MAX_REQUEST_SIZE = 1700;
-const MAX_PARAM_BODY_LENGTH = 100;
 
-const checkRequestSize = (req, res, next) => {
-  // Calculate the size of the request body
-  const requestBodySize =
-    JSON.stringify(req.body).length +
-    JSON.stringify(req.params).length +
-    // Add the estimated size of headers (adjust as needed)
-    JSON.stringify(req.headers).length;
-
-  //console.log("Request Body Size:", JSON.stringify(req.body).length);
-  //console.log("Request Params Size:", JSON.stringify(req.params).length);
-  //console.log("Request Headers Size:", JSON.stringify(req.headers).length);
-
-  // Check if the total size exceeds the limit
-  if (requestBodySize > MAX_REQUEST_SIZE) {
-    return res.status(400).json({
-      message: "Request exceeds the character limit.",
-    });
-  }
-
-  // Check if the length of req.params exceeds the limit
-  if (JSON.stringify(req.params).length > MAX_PARAM_BODY_LENGTH) {
-    return res.status(400).json({
-      message: "Length of req.params exceeds the character limit.",
-    });
-  }
-
-  // Check if the length of req.body exceeds the limit
-  if (JSON.stringify(req.body).length > MAX_PARAM_BODY_LENGTH) {
-    return res.status(400).json({
-      message: "Length of req.body exceeds the character limit.",
-    });
-  }
-
-  // If all checks pass, proceed to the next middleware
-  next();
-};
-
-app.use(checkRequestSize);
 
 
 
