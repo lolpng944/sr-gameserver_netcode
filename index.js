@@ -160,6 +160,11 @@ function isValidOrigin(origin) {
 wss.on("connection", (ws, req) => {
   rateLimiterConnection.consume(req.headers['x-forwarded-for'] )
 
+       if (req.url.slice(1).length > 200) {
+        ws.close(4004, "Unauthorized");
+        return;
+      }
+
     .then(() => {
       const token = req.url.slice(1);
        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
