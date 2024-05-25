@@ -1,5 +1,5 @@
 
-const { isRectIntersectingLine, isCollisionWithWalls, isCollisionWithTeleporters } = require('./collisions');
+const { isRectIntersectingLine, isCollisionWithWalls, isCollisionWithTeleporters, wallblocksize } = require('./collisions');
 const { increasePlayerPlace, increasePlayerWins } = require('./dbrequests')
 const { endGame } = require('./game')
 const { player_idle_timeout, walls } = require('./config')
@@ -293,10 +293,10 @@ function handleBulletCollision(room, bullet) {
       }
     }
   } else if (nearestObject && objectType === 'wall' && isRectIntersectingLine(
-    nearestObject.x - wallWidth / 2,
-    nearestObject.y - wallHeight / 2,
-    nearestObject.x + wallWidth / 2,
-    nearestObject.y + wallHeight / 2,
+    nearestObject.x - wallblocksize / 2,
+    nearestObject.y - wallblocksize / 2,
+    nearestObject.x + wallblocksize / 2,
+    nearestObject.y + wallblocksize / 2,
     bullet.startX,
     bullet.startY,
     bullet.endX,
