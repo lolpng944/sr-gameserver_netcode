@@ -2,7 +2,7 @@
 const { isRectIntersectingLine, isCollisionWithWalls, isCollisionWithTeleporters } = require('./collisions');
 const { increasePlayerPlace, increasePlayerWins } = require('./dbrequests')
 const { endGame } = require('./game')
-const { player_idle_timeout } = require('./config')
+const { player_idle_timeout, walls } = require('./config')
   //const { handleCoinCollected } = require('./room')
 
 
