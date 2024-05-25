@@ -355,4 +355,5 @@ module.exports = {
   adjustBulletEndpoint,
   lineRectIntersection,
   isRectIntersectingLine,
+  wallblocksize,
 };
