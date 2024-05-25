@@ -321,8 +321,8 @@ function handleBulletCollision(room, bullet) {
   } else if (nearestObject && objectType === 'wall' && isRectIntersectingLine2(
     nearestObject.x - wallblocksize / 2,
     nearestObject.y - wallblocksize / 2,
-    wallWidth,
-    wallHeight,
+    wallblocksize,
+    wallblocksize,
     bullet.startX,
     bullet.startY,
     bullet.endX,
