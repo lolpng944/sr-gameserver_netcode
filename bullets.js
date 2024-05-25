@@ -15,13 +15,13 @@ function handleBulletFired(result, data, player) {
     const finalshootdirection = player.shoot_direction - 90;
     const radiansfinal = (finalshootdirection * Math.PI) / 180;
     const bulletLength = weaponShootRange[player.gun];
-   /* const bulletEndpoint = calculateBulletEndpoint(
+   const bulletEndpoint = calculateBulletEndpoint(
       player.x,
       player.y,
       radiansfinal,
       bulletLength,
     );
- */
+ 
     const bullet = {
       startX: player.x,
       startY: player.y,
