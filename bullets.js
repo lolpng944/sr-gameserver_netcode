@@ -15,13 +15,13 @@ function handleBulletFired(result, data, player) {
     const finalshootdirection = player.shoot_direction - 90;
     const radiansfinal = (finalshootdirection * Math.PI) / 180;
     const bulletLength = weaponShootRange[player.gun];
-    const bulletEndpoint = calculateBulletEndpoint(
+   /* const bulletEndpoint = calculateBulletEndpoint(
       player.x,
       player.y,
       radiansfinal,
       bulletLength,
     );
-
+ */
     const bullet = {
       startX: player.x,
       startY: player.y,
@@ -33,11 +33,13 @@ function handleBulletFired(result, data, player) {
       // width: 50,
     };
 
-    adjustBulletEndpoint(room, bullet);
+    //adjustBulletEndpoint(room, bullet);
 
     // Initial add to batch
     //addToBatch(room, [{ type: "bullet", bullet }]);
     //console.log("Bullet added to batch:", bullet);
+
+   
 
     handleBulletCollision(room, bullet);
 
