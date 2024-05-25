@@ -152,13 +152,13 @@ if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
 function handleBulletCollision(room, bullet) {
   const eliminatedPlayers = [];
   let nearestObject = null;
-  let minDistanceSquared = Infinity;
+  let minDistance = Infinity;
   let objectType = null; // 'player' or 'wall'
 
-  function getDistanceSquared(x1, y1, x2, y2) {
+  function getDistance(x1, y1, x2, y2) {
     const dx = x2 - x1;
     const dy = y2 - y1;
-    return dx * dx + dy * dy;
+    return Math.sqrt(dx * dx + dy * dy);
   }
 
   function isRectIntersectingLine2(rx, ry, rw, rh, x1, y1, x2, y2) {
@@ -193,148 +193,155 @@ function handleBulletCollision(room, bullet) {
       otherPlayer.playerId !== bullet.playerId &&
       otherPlayer.visible !== false
     ) {
-      const distanceSquared = getDistanceSquared(bullet.startX, bullet.startY, otherPlayer.x, otherPlayer.y);
-      if (distanceSquared < minDistanceSquared) {
-        minDistanceSquared = distanceSquared;
-        nearestObject = otherPlayer;
-        objectType = 'player';
+      if (isRectIntersectingLine2(
+        otherPlayer.x - playerHitboxWidth / 2,
+        otherPlayer.y - playerHitboxHeight / 2,
+        playerHitboxWidth,
+        playerHitboxHeight,
+        bullet.startX,
+        bullet.startY,
+        bullet.endX,
+        bullet.endY
+      )) {
+        const distance = getDistance(bullet.startX, bullet.startY, otherPlayer.x, otherPlayer.y);
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestObject = otherPlayer;
+          objectType = 'player';
+        }
       }
     }
   });
 
   // Find the nearest wall
   walls.forEach((wall) => {
-    const distanceSquared = getDistanceSquared(bullet.startX, bullet.startY, wall.x, wall.y);
-    if (distanceSquared < minDistanceSquared) {
-      minDistanceSquared = distanceSquared;
-      nearestObject = wall;
-      objectType = 'wall';
+    if (isRectIntersectingLine2(
+      wall.x - wallblocksize / 2,
+      wall.y - wallblocksize / 2,
+      wallblocksize,
+      wallblocksize,
+      bullet.startX,
+      bullet.startY,
+      bullet.endX,
+      bullet.endY
+    )) {
+      const distance = getDistance(bullet.startX, bullet.startY, wall.x, wall.y);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestObject = wall;
+        objectType = 'wall';
+      }
     }
   });
 
-  // Check if a nearest object is found and within bullet trajectory
-  if (nearestObject && objectType === 'player' && isRectIntersectingLine2(
-    nearestObject.x - playerHitboxWidth / 2,
-    nearestObject.y - playerHitboxHeight / 2,
-    playerHitboxWidth,
-    playerHitboxHeight,
-    bullet.startX,
-    bullet.startY,
-    bullet.endX,
-    bullet.endY
-  )) {
-    // Handle collision with the nearest player
-    const shootingPlayer = room.players.get(bullet.playerId);
-    const GUN_BULLET_DAMAGE = guns_damage[bullet.gun];
+  // Check if a nearest object is found and handle the collision
+  if (nearestObject) {
+    if (objectType === 'player') {
+      // Handle collision with the nearest player
+      const shootingPlayer = room.players.get(bullet.playerId);
+      const GUN_BULLET_DAMAGE = guns_damage[bullet.gun];
 
-    // Update player's health
-    nearestObject.health -= GUN_BULLET_DAMAGE;
-    shootingPlayer.damage += GUN_BULLET_DAMAGE;
-    nearestObject.last_hit_time = new Date().getTime();
+      // Update player's health
+      nearestObject.health -= GUN_BULLET_DAMAGE;
+      shootingPlayer.damage += GUN_BULLET_DAMAGE;
+      nearestObject.last_hit_time = new Date().getTime();
 
-    // Update hitdata for shooting player
-    const hitdata = {
-      last_playerhit: {
-        playerId: nearestObject.playerId,
-        datetime: new Date().getTime(),
-        damage: GUN_BULLET_DAMAGE,
-      },
-    };
-    shootingPlayer.hitdata = JSON.stringify(hitdata);
-
-    setTimeout(() => {
-      shootingPlayer.hitdata = null;
-    }, 1000);
-
-    // Check if the player is eliminated
-    if (nearestObject.health <= 0) {
-      // Player is eliminated
-      nearestObject.visible = false;
-
-      // Update player's place
-      if (
-        Array.from(room.players.values()).filter(
-          (player) => player.visible !== false
-        ).length === 1 && room.winner === 0
-      ) {
-        nearestObject.place = 2;
-      } else {
-        nearestObject.place = room.players.size - eliminatedPlayers.length;
-      }
-
-      const existingPlace = eliminatedPlayers.find(
-        (player) => player.place === nearestObject.place
-      );
-
-      if (existingPlace) {
-        if (nearestObject.place === max_room_players) {
-          nearestObject.place--;
-        } else {
-          nearestObject.place++;
-        }
-      }
-
-      room.eliminatedPlayers.push({
-        username: nearestObject.playerId,
-        place: nearestObject.place,
-        eliminator: bullet.playerId,
-      });
-
-      increasePlayerPlace(nearestObject.playerId, nearestObject.place);
-
-      nearestObject.visible = false;
-
-      // Update stats for shooting player
-      shootingPlayer.kills++;
-      shootingPlayer.elimlast = nearestObject.playerId;
+      // Update hitdata for shooting player
+      const hitdata = {
+        last_playerhit: {
+          playerId: nearestObject.playerId,
+          datetime: new Date().getTime(),
+          damage: GUN_BULLET_DAMAGE,
+        },
+      };
+      shootingPlayer.hitdata = JSON.stringify(hitdata);
 
       setTimeout(() => {
-        shootingPlayer.elimlast = null;
+        shootingPlayer.hitdata = null;
       }, 1000);
 
-      // Check for game end conditions
-      if (
-        Array.from(room.players.values()).filter(
-          (player) => player.visible !== false
-        ).length === 1 && room.winner === 0
-      ) {
-        const remainingPlayer = Array.from(room.players.values()).find(
-          (player) => player.visible !== false
+      // Check if the player is eliminated
+      if (nearestObject.health <= 0) {
+        // Player is eliminated
+        nearestObject.visible = false;
+
+        // Update player's place
+        if (
+          Array.from(room.players.values()).filter(
+            (player) => player.visible !== false
+          ).length === 1 && room.winner === 0
+        ) {
+          nearestObject.place = 2;
+        } else {
+          nearestObject.place = room.players.size - eliminatedPlayers.length;
+        }
+
+        const existingPlace = eliminatedPlayers.find(
+          (player) => player.place === nearestObject.place
         );
 
-        room.winner = remainingPlayer.playerId;
-        console.log(`Last player standing! ${room.winner} wins!`);
-
-        increasePlayerWins(room.winner, 1);
-        increasePlayerPlace(room.winner, 1);
+        if (existingPlace) {
+          if (nearestObject.place === max_room_players) {
+            nearestObject.place--;
+          } else {
+            nearestObject.place++;
+          }
+        }
 
         room.eliminatedPlayers.push({
-          username: room.winner,
-          place: 1,
+          username: nearestObject.playerId,
+          place: nearestObject.place,
+          eliminator: bullet.playerId,
         });
 
+        increasePlayerPlace(nearestObject.playerId, nearestObject.place);
+
+        nearestObject.visible = false;
+
+        // Update stats for shooting player
+        shootingPlayer.kills++;
+        shootingPlayer.elimlast = nearestObject.playerId;
+
         setTimeout(() => {
-          endGame(room);
-        }, game_win_rest_time);
+          shootingPlayer.elimlast = null;
+        }, 1000);
+
+        // Check for game end conditions
+        if (
+          Array.from(room.players.values()).filter(
+            (player) => player.visible !== false
+          ).length === 1 && room.winner === 0
+        ) {
+          const remainingPlayer = Array.from(room.players.values()).find(
+            (player) => player.visible !== false
+          );
+
+          room.winner = remainingPlayer.playerId;
+          console.log(`Last player standing! ${room.winner} wins!`);
+
+          increasePlayerWins(room.winner, 1);
+          increasePlayerPlace(room.winner, 1);
+
+          room.eliminatedPlayers.push({
+            username: room.winner,
+            place: 1,
+          });
+
+          setTimeout(() => {
+            endGame(room);
+          }, game_win_rest_time);
+        }
       }
+    } else if (objectType === 'wall') {
+      // Handle collision with the nearest wall
+      console.log('Bullet hit a wall!');
+      // Implement logic for what happens when a bullet hits a wall, if any
     }
-  } else if (nearestObject && objectType === 'wall' && isRectIntersectingLine2(
-    nearestObject.x - wallblocksize / 2,
-    nearestObject.y - wallblocksize / 2,
-    wallblocksize,
-    wallblocksize,
-    bullet.startX,
-    bullet.startY,
-    bullet.endX,
-    bullet.endY
-  )) {
-    // Handle collision with the nearest wall
-    console.log('Bullet hit a wall!');
-    // Implement logic for what happens when a bullet hits a wall, if any
   }
 
   return eliminatedPlayers;
 }
+
 
 function handleBulletCollision2(room, bullet) {
   const eliminatedPlayers = [];
