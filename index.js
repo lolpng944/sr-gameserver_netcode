@@ -135,10 +135,10 @@ wss.on("connection", (ws, req) => {
             return;
           }
           console.log("before closed", connectedUsernames);
-   if (connectedUsernames.includes(result.playerId)) {
-     ws.close(4006, "code:double");
-       return;
-        }
+  // if (connectedUsernames.includes(result.playerId)) {
+   //  ws.close(4006, "code:double");
+     //  return;
+      //  }
 
           connectedClientsCount++;
           connectedUsernames.push(result.playerId);
