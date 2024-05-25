@@ -155,16 +155,45 @@ function handleBulletCollision(room, bullet) {
   let minDistanceSquared = Infinity;
   let objectType = null; // 'player' or 'wall'
 
+  function getDistanceSquared(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    return dx * dx + dy * dy;
+  }
+
+  function isRectIntersectingLine2(rx, ry, rw, rh, x1, y1, x2, y2) {
+    // Line-segment to rectangle intersection algorithm
+    function isIntersecting(x1, y1, x2, y2, x3, y3, x4, y4) {
+      function ccw(A, B, C) {
+        return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
+      }
+      const A = { x: x1, y: y1 }, B = { x: x2, y: y2 };
+      const C = { x: x3, y: y3 }, D = { x: x4, y: y4 };
+      return ccw(A, C, D) !== ccw(B, C, D) && ccw(A, B, C) !== ccw(A, B, D);
+    }
+
+    const rectPoints = [
+      { x: rx, y: ry }, { x: rx + rw, y: ry },
+      { x: rx + rw, y: ry + rh }, { x: rx, y: ry + rh }
+    ];
+
+    for (let i = 0; i < 4; i++) {
+      const next = (i + 1) % 4;
+      if (isIntersecting(x1, y1, x2, y2, rectPoints[i].x, rectPoints[i].y, rectPoints[next].x, rectPoints[next].y)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   // Find the nearest player
   room.players.forEach((otherPlayer) => {
     if (
       otherPlayer.playerId !== bullet.playerId &&
       otherPlayer.visible !== false
     ) {
-      const dx = otherPlayer.x - bullet.startX;
-      const dy = otherPlayer.y - bullet.startY;
-      const distanceSquared = dx * dx + dy * dy;
-
+      const distanceSquared = getDistanceSquared(bullet.startX, bullet.startY, otherPlayer.x, otherPlayer.y);
       if (distanceSquared < minDistanceSquared) {
         minDistanceSquared = distanceSquared;
         nearestObject = otherPlayer;
@@ -174,11 +203,8 @@ function handleBulletCollision(room, bullet) {
   });
 
   // Find the nearest wall
-  walls.forEach((wall) => {
-    const dx = wall.x - bullet.startX;
-    const dy = wall.y - bullet.startY;
-    const distanceSquared = dx * dx + dy * dy;
-
+  room.walls.forEach((wall) => {
+    const distanceSquared = getDistanceSquared(bullet.startX, bullet.startY, wall.x, wall.y);
     if (distanceSquared < minDistanceSquared) {
       minDistanceSquared = distanceSquared;
       nearestObject = wall;
@@ -187,11 +213,11 @@ function handleBulletCollision(room, bullet) {
   });
 
   // Check if a nearest object is found and within bullet trajectory
-  if (nearestObject && objectType === 'player' && isRectIntersectingLine(
+  if (nearestObject && objectType === 'player' && isRectIntersectingLine2(
     nearestObject.x - playerHitboxWidth / 2,
     nearestObject.y - playerHitboxHeight / 2,
-    nearestObject.x + playerHitboxWidth / 2,
-    nearestObject.y + playerHitboxHeight / 2,
+    playerHitboxWidth,
+    playerHitboxHeight,
     bullet.startX,
     bullet.startY,
     bullet.endX,
@@ -292,11 +318,11 @@ function handleBulletCollision(room, bullet) {
         }, game_win_rest_time);
       }
     }
-  } else if (nearestObject && objectType === 'wall' && isRectIntersectingLine(
+  } else if (nearestObject && objectType === 'wall' && isRectIntersectingLine2(
     nearestObject.x - wallblocksize / 2,
     nearestObject.y - wallblocksize / 2,
-    nearestObject.x + wallblocksize / 2,
-    nearestObject.y + wallblocksize / 2,
+    wallWidth,
+    wallHeight,
     bullet.startX,
     bullet.startY,
     bullet.endX,
@@ -309,7 +335,6 @@ function handleBulletCollision(room, bullet) {
 
   return eliminatedPlayers;
 }
-
 
 function handleBulletCollision2(room, bullet) {
   const eliminatedPlayers = [];
