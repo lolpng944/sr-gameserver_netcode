@@ -203,7 +203,7 @@ function handleBulletCollision(room, bullet) {
   });
 
   // Find the nearest wall
-  room.walls.forEach((wall) => {
+  walls.forEach((wall) => {
     const distanceSquared = getDistanceSquared(bullet.startX, bullet.startY, wall.x, wall.y);
     if (distanceSquared < minDistanceSquared) {
       minDistanceSquared = distanceSquared;
