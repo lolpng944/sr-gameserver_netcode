@@ -30,9 +30,9 @@ function shrinkZone(room) {
         room.zoneEndY = Math.round(room.zoneEndY);
 
     room.zone = room.zoneStartX + "," + room.zoneStartY
-        setTimeout(() => {
-            room.zone = undefined;
-          }, 100);
+      //  setTimeout(() => {
+         //   room.zone = undefined;
+         // }, 100);
 
 
       //  console.log(room.zoneEndX, room.zoneEndY);
