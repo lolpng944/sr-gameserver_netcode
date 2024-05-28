@@ -93,6 +93,7 @@ const allowedOrigins = [
   "null",
   "https://turbowarp.org",
   "https://s-r.netlify.app",
+   "https://uploads.ungrounded.net",
 ];
 
 function isValidOrigin(origin) {
