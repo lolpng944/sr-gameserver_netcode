@@ -28,6 +28,7 @@ function closeRoom(roomId) {
     clearInterval(room.intervalId); // Clear the interval associated with the room
     clearInterval(room.shrinkInterval);
      clearInterval(room.zonefulldamage);
+    clearTimeout(room.runtimeout);
      Object.keys(room).forEach(key => delete room[key]);
     rooms.delete(roomId); // Remove the room from the rooms map
     console.log(`Room ${roomId} closed.`);
