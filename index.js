@@ -94,6 +94,8 @@ const allowedOrigins = [
   "https://turbowarp.org",
   "https://s-r.netlify.app",
    "https://uploads.ungrounded.net",
+   "https://prod-dpgames.crazygames.com",
+  "https://crazygames.com"
 ];
 
 function isValidOrigin(origin) {
