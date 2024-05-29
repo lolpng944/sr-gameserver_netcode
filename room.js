@@ -318,7 +318,7 @@ function createRoom(roomId, height, width) {
 
   room.intervalId = intervalId;
 
-  setTimeout(() => {
+  const roomopentoolong = setTimeout(() => {
     closeRoom(roomId); 
     room.players.forEach((player) => {
     player.ws.close(4370, "server_runs_too_long");
@@ -326,6 +326,8 @@ function createRoom(roomId, height, width) {
 
     console.log(`Room ${roomId} closed.`);
   }, 10 * 60 * 1000); // 10 minutes in milliseconds
+
+  room.runtimeout = roomopentoolong;
 
 
   return room;
