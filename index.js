@@ -95,7 +95,8 @@ const allowedOrigins = [
   "https://s-r.netlify.app",
    "https://uploads.ungrounded.net",
    "https://prod-dpgames.crazygames.com",
-  "https://crazygames.com"
+  "https://crazygames.com",
+  "https://crazygames.com/game/skilled-royale"
 ];
 
 function isValidOrigin(origin) {
