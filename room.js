@@ -136,22 +136,20 @@ async function joinRoom(ws, token) {
 
          console.log("Player added:", room.players.get(playerId));
         
-        if (room.state === "waiting" && room.players.size > max_room_players - 1) {
-            setTimeout(() => {
-        room.state = "countdown";
-        console.log("State changed to 'countdown'");
+       if (room.state === "waiting" && room.players.size > max_room_players - 1) {
+    room.state = "countdown";
+    console.log("State changed to 'countdown'");
 
-        // Set another timeout for game_start_time milliseconds after countdown
-        setTimeout(() => {
-            room.state = "playing";
-            console.log("State changed to 'playing'");
+    // Set timeout for game_start_time milliseconds after countdown
+    setTimeout(() => {
+        room.state = "playing";
+        console.log("State changed to 'playing'");
 
-            // Start game mechanics
-            // startDecreasingHealth(room, 1);
-            startRegeneratingHealth(room, 1);
-            UseZone(room);
-        }, game_start_time);
-    }, 2000);
+        // Start game mechanics
+        // startDecreasingHealth(room, 1);
+        startRegeneratingHealth(room, 1);
+        UseZone(room);
+    }, game_start_time);
 }
 
         /*   setTimeout(() => {
