@@ -20,9 +20,25 @@ const server = http.createServer();
 
 const wss = new WebSocket.Server({ 
 noServer: true, 
-perMessageDeflate: true, 
+perMessageDeflate: {
+    zlibDeflateOptions: {
+      chunkSize: 1024,
+      memLevel: 7,
+      level: 3
+    },
+    zlibInflateOptions: {
+      chunkSize: 10 * 1024
+    },
+    clientNoContextTakeover: true,
+    serverNoContextTakeover: true,
+    serverMaxWindowBits: 10,
+    concurrencyLimit: 10,
+    threshold: 1024
+  },
+//perMessageDeflate: true, 
 proxy: false,
-maxPayload: 104 });
+maxPayload: 104 
+});
 
 app.set('trust proxy', true);
 
