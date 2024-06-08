@@ -1,5 +1,5 @@
 const { LZString, axios, Limiter } = require('./index.js');
-const { matchmaking_timeout } = require('./config.js');
+const { matchmaking_timeout, maxmodeplayers } = require('./config.js');
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { connectedUsernames } = require('./index.js');
@@ -29,8 +29,9 @@ function closeRoom(roomId) {
     clearInterval(room.shrinkInterval);
      clearInterval(room.zonefulldamage);
     clearTimeout(room.runtimeout);
+    rooms.delete(roomId); 
      Object.keys(room).forEach(key => delete room[key]);
-    rooms.delete(roomId); // Remove the room from the rooms map
+    //rooms.delete(roomId); // Remove the room from the rooms map
     console.log(`Room ${roomId} closed.`);
     
   } else {
@@ -38,7 +39,7 @@ function closeRoom(roomId) {
   }
 }
 
-async function joinRoom(ws, token) {
+async function joinRoom(ws, token, gamemode) {
   return new Promise(async (resolve, reject) => {
     try {
       const expectedOrigin = "tw-editor://.";
@@ -67,9 +68,10 @@ async function joinRoom(ws, token) {
         // Check if there's an existing room with available slots
         const availableRoom = Array.from(rooms.values()).find(
           (currentRoom) =>
-            currentRoom.players.size < max_room_players &&
+            currentRoom.players.size < maxmodeplayers[gamemode] &&
             currentRoom.state !== "playing" &&
-            currentRoom.state !== "countdown",
+            currentRoom.state !== "countdown" &&
+            currentRoom.gamemode === gamemode
         );
 
         if (availableRoom) {
@@ -77,7 +79,7 @@ async function joinRoom(ws, token) {
           room = availableRoom;
         } else {
           roomId = `room_${rooms.size + 1}`;
-          room = createRoom(roomId, WORLD_HEIGHT, WORLD_WIDTH);
+          room = createRoom(roomId, WORLD_HEIGHT, WORLD_WIDTH, gamemode, maxmodeplayers[gamemode]);
           }
 
 
@@ -135,16 +137,16 @@ async function joinRoom(ws, token) {
           gun: 1,
         });
 
-         console.log("Player added:", room.players.get(playerId));
         
-       if (room.state === "waiting" && room.players.size > max_room_players - 1) {
+        
+       if (room.state === "waiting" && room.players.size > room.maxplayers - 1) {
     room.state = "countdown";
-    console.log("State changed to 'countdown'");
+
 
     // Set timeout for game_start_time milliseconds after countdown
     setTimeout(() => {
         room.state = "playing";
-        console.log("State changed to 'playing'");
+
 
         // Start game mechanics
         // startDecreasingHealth(room, 1);
@@ -253,6 +255,7 @@ function sendBatchedMessages(room) {
       coins: room.coins,
       state: room.state,
       z: room.zone,
+      pl: room.maxplayers,
       ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
   };
 
@@ -296,10 +299,14 @@ function broadcastPlayerPositions(room) {
 const halfWorldHeight = WORLD_HEIGHT;
 const halfWorldWidth = WORLD_WIDTH;
 
-function createRoom(roomId, height, width) {
+
+
+function createRoom(roomId, height, width, gamemode, maxplayers) {
   const room = {
+    maxplayers: maxplayers,
     players: new Map(),
     state: "waiting", // Possible values: "waiting", "playing"
+    gamemode: gamemode,
     winner: 0,
     eliminatedPlayers: [],
     zoneStartX: -width, // Example start X coordinate (100 
@@ -309,6 +316,8 @@ function createRoom(roomId, height, width) {
     mapHeight: height,
     mapWidth: width,
   };
+
+  console.log(room.maxplayers)
 
   rooms.set(roomId, room);
   //generateRandomCoins(room);

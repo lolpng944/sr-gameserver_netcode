@@ -101,7 +101,7 @@ function handleElimination(room, player) {
 
 
           if (existingPlace) {
-            if (player.place === max_room_players) {
+            if (player.place === room.maxplayers) {
               player.place--;
             } else {
               player.place++;

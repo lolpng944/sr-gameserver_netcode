@@ -12,7 +12,7 @@ const SHOOT_COOLDOWN = 100;
 const BULLET_DAMAGE = 5;
 const game_start_time = 5000;
 const game_win_rest_time = 10000;
-const max_room_players = 5;
+//const max_room_players = 1;
 const maxClients = 100;
 
 const playerHitboxWidth = 60; 
@@ -55,6 +55,17 @@ const teleporters = [
   // Add more teleporters as needed
 ];
 
+const maxmodeplayers = {
+  1: 5, 
+  2: 2, 
+};
+
+const all_gamemodes = [
+  "1",
+  "2"
+];
+
+
 const weaponShootRange = {
   1: 200, 
   2: 1000, 
@@ -91,7 +102,7 @@ module.exports = {
   BULLET_DAMAGE,
   game_start_time,
   game_win_rest_time,
-  max_room_players,
+  //max_room_players,
   maxClients,
   weaponShootRange,
   weaponCooldowns,
@@ -102,5 +113,6 @@ module.exports = {
   teleporters,
   playerHitboxWidth, 
   playerHitboxHeight,
-  
+  maxmodeplayers,
+  all_gamemodes
 };

@@ -281,7 +281,7 @@ function handleBulletCollision(room, bullet) {
         );
 
         if (existingPlace) {
-          if (nearestObject.place === max_room_players) {
+          if (nearestObject.place === room.maxplayers) {
             nearestObject.place--;
           } else {
             nearestObject.place++;
