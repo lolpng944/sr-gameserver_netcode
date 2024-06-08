@@ -279,7 +279,7 @@ server.on("upgrade", (request, socket, head) => {
     request.headers["sec-websocket-origin"] || request.headers.origin;
 
   if (!isValidOrigin(origin)) {
-    ws.close(4004, "unauthorized");
+    destroy.socket();
     return;
   }
 
@@ -289,7 +289,7 @@ server.on("upgrade", (request, socket, head) => {
     });
   } else {
     // Reject the connection if the max number of clients is reached
-    ws.close(4004, "unauthorized");
+    destroy.socket();
 
   
   }
