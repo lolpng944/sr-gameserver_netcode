@@ -136,7 +136,7 @@ if (!rateLimiterConnection.consume(req.headers["x-forwarded-for"]))
   ws.close(4004, "exceed");
       return;
     }
-  }
+  
 
 
     if (connectedClientsCount > maxClients) {
