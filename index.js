@@ -151,7 +151,7 @@ wss.on("connection", (ws, req) => {
   const urlParts = req.url.split('/');
   const token = (urlParts[1]);
   const gamemode = (urlParts[2]);
-    const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+   // const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
     console.log(gamemode)
 
