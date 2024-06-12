@@ -131,7 +131,14 @@ function isvalidmode(gmd) {
 
 wss.on("connection", (ws, req) => {
 
-  rateLimiterConnection.consume(req.headers["x-forwarded-for"])
+ const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+
+    try {
+        rateLimiterConnection.consume(ip);
+    } catch () {
+        ws.close(4003, "Rate limit exceeded");
+        return;
+    }
 
   
 
