@@ -131,11 +131,8 @@ function isvalidmode(gmd) {
 
 wss.on("connection", (ws, req) => {
 
-  
-if (!rateLimiterConnection.consume(req.headers["x-forwarded-for"]))
-  ws.close(4004, "exceed");
-      return;
-    });
+  rateLimiterConnection.consume(req.headers["x-forwarded-for"])
+
   
 
 
@@ -270,6 +267,7 @@ if (!rateLimiterConnection.consume(req.headers["x-forwarded-for"]))
         console.error("Error during joinRoom:", error);
         ws.close(4001, "Token verification error");
       });
+     });
 
  
 
