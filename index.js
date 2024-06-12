@@ -132,7 +132,11 @@ function isvalidmode(gmd) {
 wss.on("connection", (ws, req) => {
 
   
-rateLimiterConnection.consume(req.headers["x-forwarded-for"])
+if (!rateLimiterConnection.consume(req.headers["x-forwarded-for"]))
+  ws.close(4004, "exceed");
+      return;
+    }
+  }
 
 
     if (connectedClientsCount > maxClients) {
@@ -272,8 +276,6 @@ rateLimiterConnection.consume(req.headers["x-forwarded-for"])
 server.on("upgrade", (request, socket, head) => {
   // Consume the rate limiter
 
-
-rateLimiterConnection.consume(request.headers["x-forwarded-for"])
 
   const origin =
     request.headers["sec-websocket-origin"] || request.headers.origin;
