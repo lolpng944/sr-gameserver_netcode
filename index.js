@@ -135,7 +135,7 @@ wss.on("connection", (ws, req) => {
 
     try {
         rateLimiterConnection.consume(ip);
-    } catch () {
+    } catch (err) {
         ws.close(4003, "Rate limit exceeded");
         return;
     }
