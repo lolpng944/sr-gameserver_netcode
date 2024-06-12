@@ -273,7 +273,7 @@ server.on("upgrade", (request, socket, head) => {
   // Consume the rate limiter
 
 
-//  rateLimiterConnection.consume(request.headers["x-forwarded-for"])
+rateLimiterConnection.consume(request.headers["x-forwarded-for"])
 
   const origin =
     request.headers["sec-websocket-origin"] || request.headers.origin;
