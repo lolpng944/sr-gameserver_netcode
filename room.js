@@ -28,6 +28,7 @@ function closeRoom(roomId) {
     clearInterval(room.intervalId); // Clear the interval associated with the room
     clearInterval(room.shrinkInterval);
      clearInterval(room.zonefulldamage);
+     clearInterval(room.pinger);
     clearTimeout(room.runtimeout);
     rooms.delete(roomId); 
      Object.keys(room).forEach(key => delete room[key]);
@@ -221,6 +222,7 @@ function sendBatchedMessages(room) {
         hitdata: player.hitdata,
         elimlast: player.elimlast,
         gun: player.gun,
+        ping: player.ping
       };
 
       if (acc[player.playerId].elimlast === null) {
@@ -256,6 +258,7 @@ function sendBatchedMessages(room) {
       state: room.state,
       z: room.zone,
       pl: room.maxplayers,
+      pg: room.sendping,
       ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
   };
 
@@ -430,8 +433,20 @@ function handleRequest(result, message) {
 
       if (data.type === "shoot") {
         player.shoot_direction = parseFloat(data.shoot_direction);
-        handleBulletFired(result, data, player);
+        handleBulletFired(result, player);
       }
+
+      if (data.type === "pong") {
+
+        console.log("passed")
+
+        const timestamp = new Date().getTime();
+        
+        player.ping = timestamp - player.lastping; 
+        
+      }
+       
+
 
       if (data.type === "switch_gun") {
         const selectedGunNumber = parseFloat(data.gun);

@@ -64,18 +64,46 @@ function dealDamage(room) {
     });
 }
 
+function pingPlayers(room) {
+  // First setTimeout
+  setTimeout(() => {
+      room.sendping = 1;
+      room.players.forEach((player) => {
+          if (player.visible !== false) {
+              player.lastping = new Date().getTime();
+          }
+      });
+  }, 2000);
+
+  // Second setTimeout
+  setTimeout(() => {
+      room.sendping = undefined;
+  }, 3000);
+
+  //pingPlayers(room);
+}
+   
+
+
 function UseZone(room) {
 
   room.zoneStartX -= 400
   room.zoneStartY -= 400
   room.zoneEndX += 400
   room.zoneEndY += 400
-  setTimeout(() => {
+ 
     room.shrinkInterval = setInterval(() => shrinkZone(room), 250);
-    
-  }, 300);
+    setInterval(() => {
+      // Ensure sendping is undefined before calling pingPlayers again
+      if (room.sendping === undefined) {
+          pingPlayers(room);
+      }
+  }, 5000);
 
-}
+    
+};
+
+
 
 function handleElimination(room, player) {
      const eliminatedPlayers = [];

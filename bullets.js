@@ -1,8 +1,8 @@
-const { calculateBulletEndpoint, adjustBulletEndpoint } = require('./collisions');
+const { calculateBulletEndpoint } = require('./collisions');
 const { handleBulletCollision } = require('./player');
 const { weaponCooldowns, weaponShootRange } = require('./config');
 
-function handleBulletFired(result, data, player) {
+function handleBulletFired(result, player) {
   const room = result.room;
   //const player = room.players.get(result.playerId);
 
@@ -15,7 +15,7 @@ function handleBulletFired(result, data, player) {
     const finalshootdirection = player.shoot_direction - 90;
     const radiansfinal = (finalshootdirection * Math.PI) / 180;
     const bulletLength = weaponShootRange[player.gun];
-   const bulletEndpoint = calculateBulletEndpoint(
+    const bulletEndpoint = calculateBulletEndpoint(
       player.x,
       player.y,
       radiansfinal,
@@ -25,25 +25,15 @@ function handleBulletFired(result, data, player) {
     const bullet = {
       startX: player.x,
       startY: player.y,
-      endX: bulletEndpoint.x, // Corrected property name
-      endY: bulletEndpoint.y, // Corrected property name
+      endX: bulletEndpoint.x,
+      endY: bulletEndpoint.y, 
       direction: radiansfinal,
       playerId: result.playerId,
       gun: player.gun,
       // width: 50,
     };
 
-    //adjustBulletEndpoint(room, bullet);
-
-    // Initial add to batch
-    //addToBatch(room, [{ type: "bullet", bullet }]);
-    //console.log("Bullet added to batch:", bullet);
-
-   
-
     handleBulletCollision(room, bullet);
-
-    // Start the update loop
 
     const shootCooldown = weaponCooldowns[player.gun];
 
@@ -52,9 +42,6 @@ function handleBulletFired(result, data, player) {
     }, shootCooldown); //
   }
 }
-
-
-
 
 
 module.exports = {

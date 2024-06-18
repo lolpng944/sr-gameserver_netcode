@@ -18,6 +18,42 @@ const {
 } = require('./config');
 
 function handleMovement(result, player) {
+  const deltaTime = player.lastProcessedPosition !== undefined ? 20 : 0; // Adjust delta time calculation as needed
+
+  const finalDirection = player.moving ? player.direction - 90 : player.direction;
+
+  const radians = (finalDirection * Math.PI) / 180;
+  const xDelta = playerspeed * deltaTime * Math.cos(radians);
+  const yDelta = playerspeed * deltaTime * Math.sin(radians);
+
+  const newX = Math.round(player.x + xDelta);
+  const newY = Math.round(player.y + yDelta);
+
+  // Check collision with walls before updating player position
+  if (!isCollisionWithWalls(newX, newY, player.x, player.y)) {
+    player.x = newX;
+    player.y = newY;
+    player.lastProcessedPosition = { x: newX, y: newY };
+  } else {
+    // Collision resolution: revert to last valid position
+    player.x = player.lastProcessedPosition.x;
+    player.y = player.lastProcessedPosition.y;
+  }
+
+  // Clamp player position within world bounds
+  player.x = Math.max(-WORLD_WIDTH, Math.min(WORLD_WIDTH, player.x));
+  player.y = Math.max(-WORLD_HEIGHT, Math.min(WORLD_HEIGHT, player.y));
+
+  // Clear any previous timeout and set a new one
+  clearTimeout(player.timeout);
+  player.timeout = setTimeout(() => {
+    player.ws.close(4200, "disconnected_inactivity");
+    result.room.players.delete(result.playerId);
+  }, player_idle_timeout);
+}
+
+
+function handleMovement2(result, player) {
   const deltaTime = player.lastProcessedPosition !== undefined ? 20 : 0;
 
   const finalDirection = player.moving
