@@ -7,7 +7,7 @@ const { walls } = require('./config');
 const wallblocksize = 50
 function isCollisionWithWalls(x, y) {
   // Filter only the walls that are within the threshold distance from (x, y)
-  const threshold = 10;
+  const threshold = 100;
   let collisionDetected = false;
   const nearbyWalls = walls.filter((wall) => {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
