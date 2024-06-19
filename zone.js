@@ -93,13 +93,13 @@ function UseZone(room) {
   room.zoneEndY += 400
  
     room.shrinkInterval = setInterval(() => shrinkZone(room), 250);
-    setInterval(() => {
+  /*  setInterval(() => {
       // Ensure sendping is undefined before calling pingPlayers again
       if (room.sendping === undefined) {
           pingPlayers(room);
       }
   }, 5000);
-
+*/
     
 };
 
