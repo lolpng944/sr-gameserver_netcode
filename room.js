@@ -436,7 +436,7 @@ function handleRequest(result, message) {
         handleBulletFired(result, player);
       }
 
-      if (data.type === "pong") {
+    /*  if (data.type === "pong") {
 
         console.log("passed")
 
@@ -445,6 +445,8 @@ function handleRequest(result, message) {
         player.ping = timestamp - player.lastping; 
         
       }
+
+      */
        
 
 
