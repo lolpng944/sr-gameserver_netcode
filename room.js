@@ -222,7 +222,7 @@ function sendBatchedMessages(room) {
         hitdata: player.hitdata,
         elimlast: player.elimlast,
         gun: player.gun,
-        ping: player.ping
+        //ping: player.ping
       };
 
       if (acc[player.playerId].elimlast === null) {
@@ -258,7 +258,7 @@ function sendBatchedMessages(room) {
       state: room.state,
       z: room.zone,
       pl: room.maxplayers,
-      pg: room.sendping,
+      //pg: room.sendping,
       ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
   };
 
