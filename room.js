@@ -451,24 +451,23 @@ function handleRequest(result, message) {
 
 
       if (data.type === "switch_gun") {
-        const selectedGunNumber = parseFloat(data.gun);
-        if (
-          selectedGunNumber !== player.gun &&
-          !player.shooting &&
-          selectedGunNumber >= 1 &&
-          selectedGunNumber <= 3
-        ) {
-          // Check if the gun number is between 1 and 3
-
-          setTimeout(() => {
-            player.shooting = false;
-          }, 1000); //
-          player.gun = selectedGunNumber;
-        } else {
-          // Notify the user that the gun number must be between 1 and 3
-          console.log("Gun number must be between 1 and 3.");
-        }
-      }
+  const selectedGunNumber = parseFloat(data.gun);
+  if (
+    selectedGunNumber !== player.gun &&
+    !player.shooting && // Check if the player is not shooting
+    selectedGunNumber >= 1 &&
+    selectedGunNumber <= 3
+  ) {
+    // Check if the gun number is between 1 and 3
+    player.gun = selectedGunNumber;
+  } else if (player.shooting) {
+    // Notify the user that they cannot switch guns while shooting
+    console.log("Cannot switch guns while shooting.");
+  } else {
+    // Notify the user that the gun number must be between 1 and 3
+    console.log("Gun number must be between 1 and 3.");
+  }
+}
 
       if (data.moving === "false") {
         clearInterval(player.moveInterval);
