@@ -327,7 +327,7 @@ function createRoom(roomId, height, width, gamemode, maxplayers) {
 
   const intervalId = setInterval(() => {
     sendBatchedMessages(room);   
-  }, server_tick_rate * 3);
+  }, server_tick_rate);
 
   room.intervalId = intervalId;
 
