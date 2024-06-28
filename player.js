@@ -224,18 +224,12 @@ function handleBulletCollision(room, bullet, timestamp) {
   }
 
   
-  const closestState = room.snap.reduce((prev, curr) => {
-    return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
-  });
 
-  console.log(closestState);
-
-  const myplayer = room.players.get(bullet.playerId);
   
 
 
   // Find the nearest player
-  closestState.players.forEach((otherPlayer) => {
+  room.players.forEach((otherPlayer) => {
     if (
       otherPlayer.playerId !== bullet.playerId &&
       otherPlayer.visible !== false
@@ -245,8 +239,8 @@ function handleBulletCollision(room, bullet, timestamp) {
         otherPlayer.y - playerHitboxHeight / 2,
         playerHitboxWidth,
         playerHitboxHeight,
-        myplayer.x,
-        myplayer.y,
+        bullet.startX,
+        bullet.startY,
         bullet.endX,
         bullet.endY
       )) {
@@ -267,8 +261,8 @@ function handleBulletCollision(room, bullet, timestamp) {
       wall.y - wallblocksize / 2,
       wallblocksize,
       wallblocksize,
-      myplayer.x,
-      myplayer.y,
+      bullet.startX,
+      bullet.startY,
       bullet.endX,
       bullet.endY
     )) {
