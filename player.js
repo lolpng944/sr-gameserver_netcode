@@ -233,7 +233,7 @@ function handleBulletCollision(room, bullet, timestamp) {
 
 
   // Find the nearest player
-  room.players.forEach((otherPlayer) => {
+  closestState.players.forEach((otherPlayer) => {
     if (
       otherPlayer.playerId !== bullet.playerId &&
       otherPlayer.visible !== false
