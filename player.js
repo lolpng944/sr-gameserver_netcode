@@ -237,7 +237,7 @@ function handleBulletCollision(room, bullet, timestamp) {
 if (closestState) {
   const { players } = closestState;
    } else {
-  const players = room.players;
+  const players = room.result.players;
    }
 
   // Find the nearest player
