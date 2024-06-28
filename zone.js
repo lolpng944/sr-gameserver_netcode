@@ -66,6 +66,8 @@ function dealDamage(room) {
 
 function pingPlayers(room) {
   // First setTimeout
+
+  console.log("sender")
   setTimeout(() => {
       room.sendping = 1;
       room.players.forEach((player) => {
@@ -73,12 +75,12 @@ function pingPlayers(room) {
               player.lastping = new Date().getTime();
           }
       });
-  }, 2000);
+  }, 200);
 
   // Second setTimeout
   setTimeout(() => {
       room.sendping = undefined;
-  }, 3000);
+  }, 500);
 
   //pingPlayers(room);
 }
@@ -93,13 +95,14 @@ function UseZone(room) {
   room.zoneEndY += 400
  
     room.shrinkInterval = setInterval(() => shrinkZone(room), 250);
-  /*  setInterval(() => {
+    pingPlayers(room);
+  room.pinger = setInterval(() => {
       // Ensure sendping is undefined before calling pingPlayers again
       if (room.sendping === undefined) {
           pingPlayers(room);
       }
-  }, 5000);
-*/
+  }, 1000);
+
     
 };
 

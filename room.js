@@ -222,7 +222,7 @@ function sendBatchedMessages(room) {
         hitdata: player.hitdata,
         elimlast: player.elimlast,
         gun: player.gun,
-        //ping: player.ping
+        ping: player.ping
       };
 
       if (acc[player.playerId].elimlast === null) {
@@ -258,7 +258,7 @@ function sendBatchedMessages(room) {
       state: room.state,
       z: room.zone,
       pl: room.maxplayers,
-      //pg: room.sendping,
+      pg: room.sendping,
       ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
   };
 
@@ -436,17 +436,20 @@ function handleRequest(result, message) {
         handleBulletFired(result, player);
       }
 
-    /*  if (data.type === "pong") {
+    if (data.type === "pong") {
 
-        console.log("passed")
+      const timestamp = new Date().getTime();
 
-        const timestamp = new Date().getTime();
-        
-        player.ping = timestamp - player.lastping; 
-        
-      }
+      if (player.lastping && (timestamp - player.lastping < 5000)) {
+        player.ping = timestamp - player.lastping;
+    } else {
+        // Handle the case where player.lastping is undefined or not recent
+        console.log("player.lastping is undefined or too old");
+        // Optionally, you could set player.ping to a default value or perform other actions
+    }
+}
 
-      */
+      
        
 
 
