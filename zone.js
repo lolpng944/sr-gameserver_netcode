@@ -21,7 +21,7 @@ function saveRoomState(room) {
 
   // Keep only the last 60 states
   if (room.snap.length > 30) {
-    room.snap.shift();
+    room.snap.pop();
   }
 }
 
