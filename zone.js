@@ -9,6 +9,23 @@ const { endGame } = require('./game')
 //           playerY >= room.zoneStartY && playerY <= room.zoneEndY;
 //}
 
+
+function saveRoomState(room) {
+  const stateSnapshot = {
+    timestamp: new Date().getTime(),
+    players: room.players,
+    //walls: JSON.parse(JSON.stringify(room.walls))
+  };
+
+  room.snap.push(stateSnapshot);
+
+  // Keep only the last 60 states
+  if (room.snap.length > 30) {
+    room.snap.shift();
+  }
+}
+
+
 function isWithinZone(room, playerX, playerY) {
     return playerX - 40 >= room.zoneStartX && playerX + 40 <= room.zoneEndX &&
            playerY - 60  >= room.zoneStartY && playerY + 60 <= room.zoneEndY;
@@ -47,7 +64,7 @@ function dealDamage(room) {
     room.players.forEach((player) => {
          if (player.visible !== false && !isWithinZone(room, player.x, player.y)) {
         if (!isWithinZone(room, player.x, player.y)) {
-            if (2 > player.health) {
+            if (1 > player.health) {
            handleElimination(room, player);
                
         } else {
@@ -67,7 +84,7 @@ function dealDamage(room) {
 function pingPlayers(room) {
   // First setTimeout
 
-  console.log("sender")
+ 
   setTimeout(() => {
       room.sendping = 1;
       room.players.forEach((player) => {
@@ -96,6 +113,10 @@ function UseZone(room) {
  
     room.shrinkInterval = setInterval(() => shrinkZone(room), 250);
     pingPlayers(room);
+ 
+    room.snapInterval = setInterval(() => {
+      saveRoomState(room);
+    }, 50); 
   room.pinger = setInterval(() => {
       // Ensure sendping is undefined before calling pingPlayers again
       if (room.sendping === undefined) {

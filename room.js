@@ -27,9 +27,10 @@ function closeRoom(roomId) {
   if (room) {
     clearInterval(room.intervalId); // Clear the interval associated with the room
     clearInterval(room.shrinkInterval);
-     clearInterval(room.zonefulldamage);
-     clearInterval(room.pinger);
+    clearInterval(room.zonefulldamage);
+    clearInterval(room.pinger);
     clearTimeout(room.runtimeout);
+    clearInterval(room.snapInterval);
     rooms.delete(roomId); 
      Object.keys(room).forEach(key => delete room[key]);
     //rooms.delete(roomId); // Remove the room from the rooms map
@@ -307,6 +308,7 @@ const halfWorldWidth = WORLD_WIDTH;
 function createRoom(roomId, height, width, gamemode, maxplayers) {
   const room = {
     maxplayers: maxplayers,
+    snap: [],
     players: new Map(),
     state: "waiting", // Possible values: "waiting", "playing"
     gamemode: gamemode,

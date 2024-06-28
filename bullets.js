@@ -37,7 +37,7 @@ function handleBulletFired(result, player) {
     gun: player.gun,
   };
 
-  handleBulletCollision(room, bullet);
+  handleBulletCollision(room, bullet, currentTime - player.ping || 0);
 
   setTimeout(() => {
     player.shooting = false;
