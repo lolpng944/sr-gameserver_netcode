@@ -364,7 +364,7 @@ function handleBulletCollision(room, bullet, timestamp) {
             (player) => player.visible !== false
           ).length === 1 && room.winner === 0
         ) {
-          const remainingPlayer = players.find(
+           const remainingPlayer = room.players.find(
             (player) => player.visible !== false
           );
 
