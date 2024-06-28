@@ -236,6 +236,7 @@ function handleBulletCollision(room, bullet, timestamp) {
   }
 
   const { players } = closestState || room.players;
+  
 
   // Find the nearest player
   players.forEach((otherPlayer) => {
@@ -364,6 +365,7 @@ function handleBulletCollision(room, bullet, timestamp) {
             (player) => player.visible !== false
           ).length === 1 && room.winner === 0
         ) {
+          console.log(players)
            const remainingPlayer = room.players.find(
             (player) => player.visible !== false
           );
