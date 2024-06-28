@@ -224,12 +224,15 @@ function handleBulletCollision(room, bullet, timestamp) {
   }
 
   
+   const closestState = result.room.snap.reduce((prev, curr) => {
+    return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
+  });
 
   
 
 
   // Find the nearest player
-  room.players.forEach((otherPlayer) => {
+ closestState.players.forEach((otherPlayer) => {
     if (
       otherPlayer.playerId !== bullet.playerId &&
       otherPlayer.visible !== false
