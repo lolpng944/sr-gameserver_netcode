@@ -234,8 +234,11 @@ function handleBulletCollision(room, bullet, timestamp) {
     console.error("No state found for the given timestamp");
     return eliminatedPlayers;
   }
-
+if (closestState) {
   const { players } = closestState;
+   } else {
+  const players = room.players;
+   }
 
   // Find the nearest player
   players.forEach((otherPlayer) => {
