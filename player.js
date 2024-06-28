@@ -319,8 +319,8 @@ function handleBulletCollision(room, bullet, timestamp) {
 
         
         // Update player's place
-        if (
-          Array.from(room.players.values()).filter(
+         if (
+          players.filter(
             (player) => player.visible !== false
           ).length === 1 && room.winner === 0
         ) {
@@ -360,12 +360,12 @@ function handleBulletCollision(room, bullet, timestamp) {
         }, 1000);
 
         // Check for game end conditions
+         // Check for game end conditions
         if (
-          Array.from(room.players.values()).filter(
+          players.filter(
             (player) => player.visible !== false
           ).length === 1 && room.winner === 0
         ) {
-          console.log(players)
            const remainingPlayer = room.players.find(
             (player) => player.visible !== false
           );
