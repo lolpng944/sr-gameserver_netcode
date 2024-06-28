@@ -17,28 +17,28 @@ function handleBulletFired(result, player) {
   player.shooting = true;
   player.lastShootTime = currentTime;
 
-//  const timestamp = currentTime - player.ping || 0
+const timestamp = currentTime - player.ping || 0
 
- //  const closestState = result.room.snap.reduce((prev, curr) => {
-//    return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
-//  });
+ const closestState = result.room.snap.reduce((prev, curr) => {
+ return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
+ });
 
   
-//const player2 = closestState.players.get(player.playerId);
+const player2 = closestState.players.get(player.playerId);
 
   const finalshootdirection = player.shoot_direction - 90;
   const radiansfinal = (finalshootdirection * Math.PI) / 180;
   const bulletLength = weaponShootRange[player.gun];
   const bulletEndpoint = calculateBulletEndpoint(
-    player.x,
-    player.y,
+    player2.x,
+    player2.y,
     radiansfinal,
     bulletLength,
   );
 
   const bullet = {
-    startX: player.x,
-    startY: player.y,
+    startX: player2.x,
+    startY: player2.y,
     endX: bulletEndpoint.x,
     endY: bulletEndpoint.y, 
     direction: radiansfinal,
