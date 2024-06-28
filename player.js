@@ -228,6 +228,8 @@ function handleBulletCollision(room, bullet, timestamp) {
     return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
   });
 
+  
+
   console.log(closestState)
 
   if (!closestState) {
@@ -236,7 +238,7 @@ function handleBulletCollision(room, bullet, timestamp) {
   }
 
   const { players } = closestState || room.players;
-  
+  console.log(players)
 
   // Find the nearest player
   players.forEach((otherPlayer) => {
