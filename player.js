@@ -224,7 +224,7 @@ function handleBulletCollision(room, bullet, timestamp) {
   }
 
   
-   const closestState = result.room.snap.reduce((prev, curr) => {
+   const closestState = room.snap.reduce((prev, curr) => {
     return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
   });
 
