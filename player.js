@@ -318,7 +318,7 @@ function handleBulletCollision(room, bullet, timestamp) {
 
         // Update player's place
         if (
-          players.filter(
+          Array.from(room.players.values()).filter(
             (player) => player.visible !== false
           ).length === 1 && room.winner === 0
         ) {
