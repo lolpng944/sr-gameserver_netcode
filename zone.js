@@ -47,7 +47,7 @@ function dealDamage(room) {
     room.players.forEach((player) => {
          if (player.visible !== false && !isWithinZone(room, player.x, player.y)) {
         if (!isWithinZone(room, player.x, player.y)) {
-            if (1 > player.health) {
+            if (2 > player.health) {
            handleElimination(room, player);
                
         } else {
