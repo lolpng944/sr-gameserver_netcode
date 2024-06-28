@@ -190,7 +190,6 @@ function handleBulletCollision(room, bullet, timestamp) {
   let nearestObject = null;
   let minDistance = Infinity;
   let objectType = null; // 'player' or 'wall'
-  console.log(room.players);
 
   function getDistance(x1, y1, x2, y2) {
     const dx = x2 - x1;
@@ -224,25 +223,17 @@ function handleBulletCollision(room, bullet, timestamp) {
     return false;
   }
 
-  // Retrieve the room state closest to the given timestamp
+  
   const closestState = room.snap.reduce((prev, curr) => {
     return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
   });
 
+  console.log(closestState);
   
 
-  console.log(closestState)
-
-  if (!closestState) {
-    console.error("No state found for the given timestamp");
-    return eliminatedPlayers;
-  }
-
-  const { players } = closestState;
-  console.log(players)
 
   // Find the nearest player
-  players.forEach((otherPlayer) => {
+  room.players.forEach((otherPlayer) => {
     if (
       otherPlayer.playerId !== bullet.playerId &&
       otherPlayer.visible !== false
@@ -293,7 +284,6 @@ function handleBulletCollision(room, bullet, timestamp) {
     if (objectType === 'player') {
       // Handle collision with the nearest player
       const shootingPlayer = room.players.get(bullet.playerId);
-
       const GUN_BULLET_DAMAGE = guns_damage[bullet.gun];
 
       // Update player's health
@@ -320,16 +310,15 @@ function handleBulletCollision(room, bullet, timestamp) {
         // Player is eliminated
         nearestObject.visible = false;
 
-        
         // Update player's place
-         if (
-          players.filter(
+        if (
+          Array.from(room.players.values()).filter(
             (player) => player.visible !== false
           ).length === 1 && room.winner === 0
         ) {
           nearestObject.place = 2;
         } else {
-          nearestObject.place = players.length - eliminatedPlayers.length;
+          nearestObject.place = room.players.size - eliminatedPlayers.length;
         }
 
         const existingPlace = eliminatedPlayers.find(
@@ -363,13 +352,12 @@ function handleBulletCollision(room, bullet, timestamp) {
         }, 1000);
 
         // Check for game end conditions
-         // Check for game end conditions
         if (
-          players.filter(
+          Array.from(room.players.values()).filter(
             (player) => player.visible !== false
           ).length === 1 && room.winner === 0
         ) {
-           const remainingPlayer = room.players.find(
+          const remainingPlayer = Array.from(room.players.values()).find(
             (player) => player.visible !== false
           );
 
@@ -398,7 +386,6 @@ function handleBulletCollision(room, bullet, timestamp) {
 
   return eliminatedPlayers;
 }
-
 
 
 function handleBulletCollision2(room, bullet) {
