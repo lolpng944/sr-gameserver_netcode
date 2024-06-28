@@ -288,7 +288,8 @@ function handleBulletCollision(room, bullet, timestamp) {
   if (nearestObject) {
     if (objectType === 'player') {
       // Handle collision with the nearest player
-      const shootingPlayer = players.find(player => player.playerId === bullet.playerId);
+      const shootingPlayer = room.players.get(bullet.playerId);
+
       const GUN_BULLET_DAMAGE = guns_damage[bullet.gun];
 
       // Update player's health
