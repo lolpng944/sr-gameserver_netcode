@@ -190,6 +190,7 @@ function handleBulletCollision(room, bullet, timestamp) {
   let nearestObject = null;
   let minDistance = Infinity;
   let objectType = null; // 'player' or 'wall'
+  console.log(room.players);
 
   function getDistance(x1, y1, x2, y2) {
     const dx = x2 - x1;
@@ -237,7 +238,7 @@ function handleBulletCollision(room, bullet, timestamp) {
     return eliminatedPlayers;
   }
 
-  const { players } = closestState || room.players;
+  const { players } = closestState;
   console.log(players)
 
   // Find the nearest player
