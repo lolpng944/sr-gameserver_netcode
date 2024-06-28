@@ -229,6 +229,8 @@ function handleBulletCollision(room, bullet, timestamp) {
   });
 
   console.log(closestState);
+
+  const myplayer = room.players.get(bullet.playerId);
   
 
 
@@ -243,8 +245,8 @@ function handleBulletCollision(room, bullet, timestamp) {
         otherPlayer.y - playerHitboxHeight / 2,
         playerHitboxWidth,
         playerHitboxHeight,
-        bullet.startX,
-        bullet.startY,
+        myplayer.x,
+        myplayer.y,
         bullet.endX,
         bullet.endY
       )) {
@@ -265,8 +267,8 @@ function handleBulletCollision(room, bullet, timestamp) {
       wall.y - wallblocksize / 2,
       wallblocksize,
       wallblocksize,
-      bullet.startX,
-      bullet.startY,
+      myplayer.x,
+      myplayer.y,
       bullet.endX,
       bullet.endY
     )) {
