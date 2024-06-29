@@ -1,216 +1,181 @@
 const { LZString, axios, Limiter } = require('./index.js');
-const { matchmaking_timeout, maxmodeplayers } = require('./config.js');
+const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORLD_HEIGHT, game_start_time, max_room_players, spawnPositions, batchedMessages, rooms, walls } = require('./config.js');
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { connectedUsernames } = require('./index.js');
-const { startDecreasingHealth, startRegeneratingHealth } = require('./match-modifiers')
-const { UseZone, printZone } = require('./zone')
-
-const {
-  server_tick_rate,
-    WORLD_WIDTH,
-    WORLD_HEIGHT,
-    game_start_time,
-    max_room_players,
-    spawnPositions,
-    batchedMessages,
-    rooms,
-    walls,
-   // isValidDirection,
-} = require('./config');
-
-
-
+const { startDecreasingHealth, startRegeneratingHealth } = require('./match-modifiers');
+const { UseZone, printZone } = require('./zone');
 
 function closeRoom(roomId) {
   const room = rooms.get(roomId);
   if (room) {
-    clearInterval(room.intervalId); // Clear the interval associated with the room
+    clearInterval(room.intervalId);
     clearInterval(room.shrinkInterval);
     clearInterval(room.zonefulldamage);
     clearInterval(room.pinger);
     clearTimeout(room.runtimeout);
     clearInterval(room.snapInterval);
-    rooms.delete(roomId); 
-     Object.keys(room).forEach(key => delete room[key]);
-    //rooms.delete(roomId); // Remove the room from the rooms map
+    clearInterval(room.cleanupinterval);
+    rooms.delete(roomId);
+
+    // Clean up resources associated with players in the room
+    room.players.forEach(player => {
+      clearInterval(player.moveInterval);
+      clearTimeout(player.timeout);
+      player.ws.close();
+    });
+
     console.log(`Room ${roomId} closed.`);
-    
   } else {
     console.log(`Room ${roomId} not found.`);
   }
 }
 
 async function joinRoom(ws, token, gamemode) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const expectedOrigin = "tw-editor://.";
-      const response = await axios.get(
-        `https://liquemgames-api.netlify.app/verify-gameservertoken/${token}`,
-        {
-          headers: {
-            Origin: expectedOrigin,
-          },
+  try {
+    const expectedOrigin = "tw-editor://.";
+    const response = await axios.get(
+      `https://liquemgames-api.netlify.app/verify-gameservertoken/${token}`,
+      {
+        headers: {
+          Origin: expectedOrigin,
         },
-      );
+      },
+    );
 
+    if (response.data.message) {
       let roomId;
       let room;
 
-
-      if (response.data.message) {
-        for (const [id, currentRoom] of rooms) {
-          if (currentRoom.players.size < 1) {
-            roomId = id || "room_1";
-            room = currentRoom;
-            break;
-          }
+      for (const [id, currentRoom] of rooms) {
+        if (currentRoom.players.size < 1) {
+          roomId = id || "room_1";
+          room = currentRoom;
+          break;
         }
+      }
 
-        // Check if there's an existing room with available slots
-        const availableRoom = Array.from(rooms.values()).find(
-          (currentRoom) =>
-            currentRoom.players.size < maxmodeplayers[gamemode] &&
-            currentRoom.state !== "playing" &&
-            currentRoom.state !== "countdown" &&
-            currentRoom.gamemode === gamemode
-        );
+      // Check if there's an existing room with available slots
+      const availableRoom = Array.from(rooms.values()).find(
+        (currentRoom) =>
+          currentRoom.players.size < maxmodeplayers[gamemode] &&
+          currentRoom.state !== "playing" &&
+          currentRoom.state !== "countdown" &&
+          currentRoom.gamemode === gamemode
+      );
 
-        if (availableRoom) {
-          roomId = availableRoom.roomId || "room_1";
-          room = availableRoom;
-        } else {
-          roomId = `room_${rooms.size + 1}`;
-          room = createRoom(roomId, WORLD_HEIGHT, WORLD_WIDTH, gamemode, maxmodeplayers[gamemode]);
-          }
+      if (availableRoom) {
+        roomId = availableRoom.roomId || "room_1";
+        room = availableRoom;
+      } else {
+        roomId = `room_${rooms.size + 1}`;
+        room = createRoom(roomId, WORLD_HEIGHT, WORLD_WIDTH, gamemode, maxmodeplayers[gamemode]);
+      }
 
-
-        function createRateLimiter() {
-          const rate = 50; // Allow one request every 50 milliseconds
-          return new Limiter({
-            tokensPerInterval: rate,
-            interval: 1000, // milliseconds
-          });
-        }
-
-
-
-        const playerId = response.data.message;
-        const hat = response.data.hat;
-        const top = response.data.top;
-        const player_color = response.data.player_color;
-        const hat_color = response.data.hat_color;
-        const top_color = response.data.top_color;
-        const playerRateLimiter = createRateLimiter();
-
-        let spawnIndex;
-       // const spawnIndex = room.players.size;
-         // Synchronize access to players map to handle simultaneous joins
-        const playerCount = room.players.size;
-        spawnIndex = playerCount % spawnPositions.length;
-
-
-        room.players.set(playerId, {
-          ws,
-          x: spawnPositions[spawnIndex].x,
-          y: spawnPositions[spawnIndex].y,
-          direction: null,
-          prevX: 0,
-          prevY: 0,
-          lastProcessedPosition: { x: spawnPositions[spawnIndex].x, y: spawnPositions[spawnIndex].y },
-          playerId: playerId,
-          rateLimiter: playerRateLimiter,
-          hat: hat,
-          top: top,
-          player_color: player_color,
-          hat_color: hat_color,
-          top_color: top_color,
-          timeout: null, // Add timeout property to player
-          health: 100,
-          damage: 0,
-          kills: 0,
-          lastShootTime: 0,
-          moving: false,
-          moveInterval: null,
-          visible: true,
-          place: null,
-          shooting: false,
-          shoot_direction: 90,
-          gun: 1,
+      function createRateLimiter() {
+        const rate = 50; // Allow one request every 50 milliseconds
+        return new Limiter({
+          tokensPerInterval: rate,
+          interval: 1000, // milliseconds
         });
+      }
 
-        
-        
-       if (room.state === "waiting" && room.players.size > room.maxplayers - 1) {
-    room.state = "countdown";
+      const playerId = response.data.message;
+      const hat = response.data.hat;
+      const top = response.data.top;
+      const player_color = response.data.player_color;
+      const hat_color = response.data.hat_color;
+      const top_color = response.data.top_color;
+      const playerRateLimiter = createRateLimiter();
 
+      // Determine spawn position index
+      const playerCount = room.players.size;
+      const spawnIndex = playerCount % spawnPositions.length;
 
-    // Set timeout for game_start_time milliseconds after countdown
-    setTimeout(() => {
-        room.state = "playing";
+      room.players.set(playerId, {
+        ws,
+        x: spawnPositions[spawnIndex].x,
+        y: spawnPositions[spawnIndex].y,
+        direction: null,
+        prevX: 0,
+        prevY: 0,
+        lastProcessedPosition: { x: spawnPositions[spawnIndex].x, y: spawnPositions[spawnIndex].y },
+        playerId: playerId,
+        rateLimiter: playerRateLimiter,
+        hat: hat,
+        top: top,
+        player_color: player_color,
+        hat_color: hat_color,
+        top_color: top_color,
+        timeout: null, // Add timeout property to player
+        health: 100,
+        damage: 0,
+        kills: 0,
+        lastShootTime: 0,
+        moving: false,
+        moveInterval: null,
+        visible: true,
+        place: null,
+        shooting: false,
+        shoot_direction: 90,
+        gun: 1,
+      });
 
+      // Handle room state transitions and game start
+      if (room.state === "waiting" && room.players.size > room.maxplayers - 1) {
+        room.state = "countdown";
 
-        // Start game mechanics
-        // startDecreasingHealth(room, 1);
-        startRegeneratingHealth(room, 1);
-        UseZone(room);
-    }, game_start_time);
-}
+        room.cleanupinterval = setInterval(() => {
+          cleanupRoom(roomId);
+        }, 1000);
 
-        /*   setTimeout(() => {
-               room.state = "countdown";
-          }, 2000);
-
-          
-          // Start the game
-        
-
-          setTimeout(() => {
-            room.state = "playing";
-            
-          }, game_start_time);
-
-          //startDecreasingHealth(room, 1);
+        setTimeout(() => {
+          room.state = "playing";
           startRegeneratingHealth(room, 1);
           UseZone(room);
-        }
-
-        */
-
-        // Set timeout to disconnect player after 5 minutes of inactivity
-        const playerTimeout = setTimeout(
-          () => {
-            ws.close(4100, "matchmaking_timeout");
-            room.players.delete(playerId);
-          },
-          matchmaking_timeout,
-        ); // 5 minutes in milliseconds
-
-        // Assign the timeout ID to the player
-        room.players.get(playerId).timeout = playerTimeout;
-
-        resolve({ roomId, playerId, room });
-      } else {
-        ws.close(4001, "Invalid token");
-        reject("Invalid token");
+        }, game_start_time);
       }
-    } catch (error) {
-      console.error("Error verifying token:", error);
-      ws.close(4000, "Token verification error");
-      reject("Token verification error");
+
+      // Set timeout to disconnect player after 5 minutes of inactivity
+      const playerTimeout = setTimeout(() => {
+        ws.close(4100, "matchmaking_timeout");
+        room.players.delete(playerId);
+      }, matchmaking_timeout);
+
+      // Assign the timeout ID to the player
+      room.players.get(playerId).timeout = playerTimeout;
+
+      return { roomId, playerId, room };
+    } else {
+      ws.close(4001, "Invalid token");
+      throw new Error("Invalid token");
     }
-  });
-}
-
-function addToBatch(room, messages) {
-  if (!batchedMessages.has(room)) {
-    batchedMessages.set(room, []);
+  } catch (error) {
+    console.error("Error joining room:", error);
+    ws.close(4000, "Error joining room");
+    throw error;
   }
-  batchedMessages.get(room).push(...messages);
 }
 
+function cleanupRoom(roomId) {
+  const room = rooms.get(roomId);
 
-function sendBatchedMessages(room) {
+  if (!room || room.players.size < 1 || !rooms.has(roomId)) {
+    clearInterval(room.cleanupinterval);
+    closeRoom(roomId);
+  }
+}
+
+function addToBatch(roomId, messages) {
+  if (!batchedMessages.has(roomId)) {
+    batchedMessages.set(roomId, []);
+  }
+  batchedMessages.get(roomId).push(...messages);
+}
+
+function sendBatchedMessages(roomId) {
+  const room = rooms.get(roomId);
+
   const playerData = Array.from(room.players.values()).reduce((acc, player) => {
     if (player.visible !== false) {
       acc[player.playerId] = {
@@ -219,24 +184,11 @@ function sendBatchedMessages(room) {
         direction: player.direction,
         health: player.health,
         shooting: player.shooting,
-        //damage: player.damage,
-        hitdata: player.hitdata,
-        elimlast: player.elimlast,
         gun: player.gun,
         ping: player.ping
       };
 
-      if (acc[player.playerId].elimlast === null) {
-        delete acc[player.playerId].elimlast;
-      }
-
-      for (const prop in acc[player.playerId]) {
-        if (acc[player.playerId][prop] === null) {
-          delete acc[player.playerId][prop];
-        }
-      }
-
-      // Include additional properties only when playing.state is not "playing"
+      // Include additional properties only when room state is not "playing"
       if (room.state !== "playing") {
         acc[player.playerId].hat = player.hat;
         acc[player.playerId].top = player.top;
@@ -249,18 +201,14 @@ function sendBatchedMessages(room) {
     return acc;
   }, {});
 
-  //const bullets = batchedMessages
-   // .get(room)
-    //.filter((msg) => msg.type === "bullet");
-
   const newMessage = {
-      ...playerData ? { playerData } : {},
-      coins: room.coins,
-      state: room.state,
-      z: room.zone,
-      pl: room.maxplayers,
-      pg: room.sendping,
-      ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
+    ...playerData ? { playerData } : {},
+    coins: room.coins,
+    state: room.state,
+    z: room.zone,
+    pl: room.maxplayers,
+    pg: room.sendping,
+    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
   };
 
   const jsonString = JSON.stringify(newMessage);
@@ -269,86 +217,55 @@ function sendBatchedMessages(room) {
   if (room.lastSentMessage !== jsonString) {
     room.players.forEach((player) => {
       player.ws.send(compressedString, { binary: true });
-
     });
 
     room.lastSentMessage = jsonString;
   }
 
-  batchedMessages.set(room, []); // Clear the batch after sending
+  batchedMessages.set(roomId, []); // Clear the batch after sending
 }
-
-
-
-
-function broadcastPlayerPositions(room) {
-  const playerPositions = Array.from(room.players.entries()).reduce(
-    (acc, [playerId, player]) => {
-      acc[playerId] = { x: player.x, y: player.y, direction: player.direction };
-      return acc;
-    },
-    {},
-  );
-
-  const message = {
-    type: "update",
-    playerData: playerPositions,
-    coins: room.coins,
-  };
-
-  room.players.forEach((player) => {
-    player.ws.send(JSON.stringify(message));
-  });
-}
-const halfWorldHeight = WORLD_HEIGHT;
-const halfWorldWidth = WORLD_WIDTH;
-
-
 
 function createRoom(roomId, height, width, gamemode, maxplayers) {
   const room = {
+    roomId: roomId,
     maxplayers: maxplayers,
     snap: [],
     players: new Map(),
-    state: "waiting", // Possible values: "waiting", "playing"
+    state: "waiting", // Possible values: "waiting", "playing", "countdown"
     gamemode: gamemode,
     winner: 0,
     eliminatedPlayers: [],
-    zoneStartX: -width, // Example start X coordinate (100 
-    zoneStartY: -height, // Example start Y coordinate (100 
-    zoneEndX: width,  // Example end X coordinate (100 units 
+    zoneStartX: -width, // Example start X coordinate (100 units left of the center)
+    zoneStartY: -height, // Example start Y coordinate (100 units above the center)
+    zoneEndX: width,  // Example end X coordinate (100 units right of the center)
     zoneEndY: height,
     mapHeight: height,
     mapWidth: width,
   };
 
-  console.log(room.maxplayers)
-
   rooms.set(roomId, room);
-  //generateRandomCoins(room);
 
+
+  // Start sending batched messages at regular intervals
   const intervalId = setInterval(() => {
-    sendBatchedMessages(room);   
+    sendBatchedMessages(roomId);
   }, server_tick_rate);
 
   room.intervalId = intervalId;
 
+  // Close the room after 10 minutes of being open
   const roomopentoolong = setTimeout(() => {
-    closeRoom(roomId); 
-    room.players.forEach((player) => {
-    player.ws.close(4370, "server_runs_too_long");
-    });
-
-    console.log(`Room ${roomId} closed.`);
+    closeRoom(roomId);
+    console.log(`Room ${roomId} closed due to timeout.`);
   }, 10 * 60 * 1000); // 10 minutes in milliseconds
 
   room.runtimeout = roomopentoolong;
 
-
   return room;
 }
 
-function generateRandomCoins(room) {
+function generateRandomCoins(roomId) {
+  const room = rooms.get(roomId);
   const coins = [];
   for (let i = 0; i < 1; i++) {
     const coin = {
@@ -364,18 +281,18 @@ function generateRandomCoins(room) {
     coins: room.coins,
   };
 
-  addToBatch(room, [coinsMessage]);
+  addToBatch(roomId, [coinsMessage]);
 }
 
 function handleCoinCollected(result, index) {
-  const room = result.room;
+  const room = rooms.get(result.roomId);
   const playerId = result.playerId;
   const player = room.players.get(playerId);
 
   // Remove the collected coin
   room.coins.splice(index, 1);
 
-  // Increase player's coins on the server
+  // Increase player's coins on the server (example post request)
   const expectedOrigin = "tw-editor://.";
   axios
     .post(
@@ -407,20 +324,18 @@ function handleCoinCollected(result, index) {
   };
 
   // Add both messages to the batch
-  addToBatch(room, [coinCollectedMessage, coinsMessage]);
+  addToBatch(result.roomId, [coinCollectedMessage, coinsMessage]);
 
   // Generate new random coins
-  generateRandomCoins(room);
+  generateRandomCoins(result.roomId);
 }
-
 
 const validDirections = [-90, 0, 180, -180, 90, 45, 135, -135, -45];
 
 const isValidDirection = (direction) => {
-const numericDirection = parseFloat(direction);
-return !isNaN(numericDirection) && validDirections.includes(numericDirection);
-  };
-
+  const numericDirection = parseFloat(direction);
+  return !isNaN(numericDirection) && validDirections.includes(numericDirection);
+};
 
 function handleRequest(result, message) {
   const player = result.room.players.get(result.playerId);
@@ -445,8 +360,7 @@ function handleRequest(result, message) {
       if (player.lastping && (timestamp - player.lastping < 5000)) {
         player.ping = timestamp - player.lastping;
     } else {
-        // Handle the case where player.lastping is undefined or not recent
-        console.log("player.lastping is undefined or too old");
+
         // Optionally, you could set player.ping to a default value or perform other actions
     }
 }
@@ -461,7 +375,7 @@ function handleRequest(result, message) {
     selectedGunNumber !== player.gun &&
     !player.shooting && // Check if the player is not shooting
     selectedGunNumber >= 1 &&
-    selectedGunNumber <= 3
+    selectedGunNumber <= 2
   ) {
     // Check if the gun number is between 1 and 3
     player.gun = selectedGunNumber;
@@ -532,7 +446,6 @@ function handleRequest(result, message) {
   }
 }
 
-
 module.exports = {
   handleCoinCollected,
   joinRoom,
@@ -542,5 +455,4 @@ module.exports = {
   generateRandomCoins,
   handleRequest,
   closeRoom
-
 };

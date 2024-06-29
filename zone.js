@@ -16,7 +16,7 @@ function saveRoomState(room) {
     players: room.players,
     //walls: JSON.parse(JSON.stringify(room.walls))
   };
-
+console.log("snapshot")
   room.snap.push(stateSnapshot);
 
   // Keep only the last 60 states
