@@ -244,6 +244,7 @@ function createRoom(roomId, height, width, gamemode, maxplayers) {
   };
 
   rooms.set(roomId, room);
+console.log("room created:", roomId)
 
 
   // Start sending batched messages at regular intervals
