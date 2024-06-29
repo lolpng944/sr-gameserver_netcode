@@ -309,7 +309,7 @@ server.on("upgrade", (request, socket, head) => {
 });
 });
 
-/*process.on("uncaughtException", (error) => {
+process.on("uncaughtException", (error) => {
   console.error("Uncaught Exception:", error);
 });
 
@@ -321,7 +321,7 @@ process.on("unhandledRejection", (reason, promise) => {
 module.exports = {
   handleGlobalErrors: () => {},
 };
-*/
+
 
 const PORT = process.env.PORT || 8070;
 
