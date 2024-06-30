@@ -16,7 +16,6 @@ function closeRoom(roomId) {
     clearTimeout(room.runtimeout);
     clearInterval(room.snapInterval);
     clearInterval(room.cleanupinterval);
-    rooms.delete(roomId);
 
     // Clean up resources associated with players in the room
     room.players.forEach(player => {
@@ -24,6 +23,8 @@ function closeRoom(roomId) {
       clearTimeout(player.timeout);
       player.ws.close();
     });
+
+    rooms.delete(roomId);
 
     console.log(`Room ${roomId} closed.`);
   } else {
