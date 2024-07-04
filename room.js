@@ -359,7 +359,7 @@ function handleRequest(result, message) {
 
       const timestamp = new Date().getTime();
 
-      if (player.lastping && (timestamp - player.lastping < 5000)) {
+      if (player.lastping && (timestamp - player.lastping < 1000)) {
         player.ping = timestamp - player.lastping;
     } else {
 
