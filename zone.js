@@ -85,14 +85,14 @@ function pingPlayers(room) {
   // First setTimeout
 
  
-  setTimeout(() => {
-      room.sendping = 1;
-      room.players.forEach((player) => {
-          if (player.visible !== false) {
-              player.lastping = new Date().getTime();
-          }
-      });
-  }, 200);
+ setTimeout(() => {
+    room.players.forEach((player) => {
+        if (player.visible !== false) {
+            player.lastping = new Date().getTime();
+        }
+    });
+    room.sendping = 1;
+}, 200);
 
   // Second setTimeout
   setTimeout(() => {
