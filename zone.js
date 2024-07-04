@@ -30,14 +30,14 @@ function isWithinZone(room, playerX, playerY) {
     return playerX - 40 >= room.zoneStartX && playerX + 40 <= room.zoneEndX &&
            playerY - 60  >= room.zoneStartY && playerY + 60 <= room.zoneEndY;
 }
-shrinkspeed = 1.5 / 1000
+shrinkspeed = 5 / 1000
 // Function to shrink the game zone
 function shrinkZone(room) {
-    dealDamage(room);
+   dealDamage(room);
     if (room.zoneEndX > 2 && room.zoneEndY > 2) {
         
-      room.zoneStartX += shrinkspeed * room.mapWidth
-      room.zoneStartY += shrinkspeed * room.mapHeight
+      room.zoneStartX += shrinkspeed * room.mapWidth;
+      room.zoneStartY += shrinkspeed * room.mapHeight;
       room.zoneEndX -= shrinkspeed * room.mapWidth;
       room.zoneEndY -= shrinkspeed * room.mapHeight;
 
@@ -106,10 +106,10 @@ function pingPlayers(room) {
 
 function UseZone(room) {
 
-  room.zoneStartX -= 400
-  room.zoneStartY -= 400
-  room.zoneEndX += 400
-  room.zoneEndY += 400
+  room.zoneStartX -= room.mapWidth / 2
+  room.zoneStartY -= room.mapHeight / 2
+  room.zoneEndX += room.mapWidth / 2
+  room.zoneEndY += room.mapHeight / 2
  
     room.shrinkInterval = setInterval(() => shrinkZone(room), 250);
     pingPlayers(room);
@@ -211,5 +211,4 @@ function handleElimination(room, player) {
 module.exports = {
     UseZone,
 };
-
 
