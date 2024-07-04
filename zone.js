@@ -1,4 +1,4 @@
-const { WORLD_HEIGHT, WORLD_WIDTH, game_win_rest_time } = require('./config');
+const { WORLD_HEIGHT, WORLD_WIDTH, game_win_rest_time, server_tick_rate } = require('./config');
 
 const { increasePlayerPlace, increasePlayerWins } = require('./dbrequests')
 const { endGame } = require('./game')
@@ -116,7 +116,7 @@ function UseZone(room) {
  
     room.snapInterval = setInterval(() => {
       saveRoomState(room);
-    }, 50); 
+    }, server_tick_rate - 2); 
   room.pinger = setInterval(() => {
       // Ensure sendping is undefined before calling pingPlayers again
       if (room.sendping === undefined) {
