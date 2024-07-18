@@ -4,6 +4,7 @@ const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { connectedUsernames } = require('./index.js');
 const { startDecreasingHealth, startRegeneratingHealth } = require('./match-modifiers');
+const { verifyPlayer } = require('./dbrequests');
 const { UseZone, printZone } = require('./zone');
 
 function closeRoom(roomId) {
@@ -35,18 +36,14 @@ function closeRoom(roomId) {
 async function joinRoom(ws, token, gamemode) {
   try {
     const expectedOrigin = "tw-editor://.";
-    const response = await axios.get(
-      `https://liquemgames-api.netlify.app/verify-gameservertoken/${token}`,
-      {
-        headers: {
-          Origin: expectedOrigin,
-        },
-      },
-    );
+    
 
-    if (response.data.message) {
-      let roomId;
-      let room;
+    const playerVerified = await verifyPlayer(token);
+    if (!playerVerified) {
+      ws.close(4001, "Invalid token");
+      throw new Error("Invalid token");
+    }
+
 
       for (const [id, currentRoom] of rooms) {
         if (currentRoom.players.size < 1) {
@@ -81,12 +78,7 @@ async function joinRoom(ws, token, gamemode) {
         });
       }
 
-      const playerId = response.data.message;
-      const hat = response.data.hat;
-      const top = response.data.top;
-      const player_color = response.data.player_color;
-      const hat_color = response.data.hat_color;
-      const top_color = response.data.top_color;
+      const { playerId, hat, top, player_color, hat_color, top_color } = playerVerified;
       const playerRateLimiter = createRateLimiter();
 
       // Determine spawn position index
@@ -101,6 +93,7 @@ async function joinRoom(ws, token, gamemode) {
         prevX: 0,
         prevY: 0,
         lastProcessedPosition: { x: spawnPositions[spawnIndex].x, y: spawnPositions[spawnIndex].y },
+        bullet2: { x: spawnPositions[spawnIndex].x, y: spawnPositions[spawnIndex].y },
         playerId: playerId,
         rateLimiter: playerRateLimiter,
         hat: hat,
@@ -120,6 +113,7 @@ async function joinRoom(ws, token, gamemode) {
         shooting: false,
         shoot_direction: 90,
         gun: 1,
+        bullets: [],
       });
 
       // Handle room state transitions and game start
@@ -134,6 +128,7 @@ async function joinRoom(ws, token, gamemode) {
           room.state = "playing";
           startRegeneratingHealth(room, 1);
           UseZone(room);
+         // generateRandomCoins(room);
         }, game_start_time);
       }
 
@@ -147,10 +142,7 @@ async function joinRoom(ws, token, gamemode) {
       room.players.get(playerId).timeout = playerTimeout;
 
       return { roomId, playerId, room };
-    } else {
-      ws.close(4001, "Invalid token");
-      throw new Error("Invalid token");
-    }
+    
   } catch (error) {
     console.error("Error joining room:", error);
     ws.close(4000, "Error joining room");
@@ -174,11 +166,91 @@ function addToBatch(roomId, messages) {
   batchedMessages.get(roomId).push(...messages);
 }
 
+function getDistance(x1, y1, x2, y2) {
+return Math.sqrt(
+    Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2),
+  );
+
+}
+
+/*function sendBatchedMessages(roomId) {
+  const room = rooms.get(roomId);
+  if (!room) return;
+
+  room.players.forEach((player) => {
+    if (!player.visible) return; // Skip players where visible is false
+
+    const playerData = Array.from(room.players.values()).reduce((acc, otherPlayer) => {
+      if (!otherPlayer.visible) return acc; // Skip other players where visible is false
+
+
+     
+
+      if (!player.visible || player.playerId === otherPlayer.playerId || getDistance(player.x, player.y, otherPlayer.x, otherPlayer.y) <= 380) {
+        acc[otherPlayer.playerId] = {
+          x: otherPlayer.x,
+          y: otherPlayer.y,
+          direction: otherPlayer.direction,
+          health: otherPlayer.health,
+          shooting: otherPlayer.shooting,
+          gun: otherPlayer.gun,
+          ping: otherPlayer.ping,
+          hitdata: otherPlayer.hitdata,
+        };
+
+        // Include additional properties only when room state is not "playing"
+        if (room.state !== "playing") {
+          acc[otherPlayer.playerId].hat = otherPlayer.hat;
+          acc[otherPlayer.playerId].top = otherPlayer.top;
+          acc[otherPlayer.playerId].player_color = otherPlayer.player_color;
+          acc[otherPlayer.playerId].hat_color = otherPlayer.hat_color;
+          acc[otherPlayer.playerId].top_color = otherPlayer.top_color;
+        }
+      }
+      return acc;
+    }, {});
+
+    const newMessage = {
+      playerData,
+      coins: room.coins,
+      state: room.state,
+      z: room.zone,
+      pl: room.maxplayers,
+      pg: room.sendping,
+      rp: room.players.size,
+      ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { eliminatedPlayers: room.eliminatedPlayers } : {}),
+    };
+
+    const jsonString = JSON.stringify(newMessage);
+    const compressedString = LZString.compressToUint8Array(jsonString);
+
+    if (player.lastSentMessage !== jsonString) {
+      player.ws.send(compressedString, { binary: true });
+      player.lastSentMessage = jsonString;
+    }
+  });
+
+  batchedMessages.set(roomId, []); // Clear the batch after sending
+}
+*/
+
 function sendBatchedMessages(roomId) {
   const room = rooms.get(roomId);
 
+
+
   const playerData = Array.from(room.players.values()).reduce((acc, player) => {
+
     if (player.visible !== false) {
+
+      const formattedBullets = player.bullets.map(bullet => ({
+        x: bullet.x,
+        y: bullet.y,
+        d: bullet.direction
+      }));
+     
+      
+
       acc[player.playerId] = {
         x: player.x,
         y: player.y,
@@ -186,8 +258,11 @@ function sendBatchedMessages(roomId) {
         health: player.health,
         shooting: player.shooting,
         gun: player.gun,
-        ping: player.ping
+        ping: player.ping,
+        hitdata: player.hitdata,
+        bullets: formattedBullets,
       };
+
 
       // Include additional properties only when room state is not "playing"
       if (room.state !== "playing") {
@@ -204,11 +279,13 @@ function sendBatchedMessages(roomId) {
 
   const newMessage = {
     ...playerData ? { playerData } : {},
-    coins: room.coins,
+    //coins: room.coins,
     state: room.state,
     z: room.zone,
     pl: room.maxplayers,
     pg: room.sendping,
+    rp: room.players.size,
+    //coins: room.coins,
     ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
   };
 
@@ -224,7 +301,8 @@ function sendBatchedMessages(roomId) {
   }
 
   batchedMessages.set(roomId, []); // Clear the batch after sending
-}
+} 
+
 
 function createRoom(roomId, height, width, gamemode, maxplayers) {
   const room = {
@@ -271,22 +349,17 @@ function generateRandomCoins(roomId) {
   const coins = [];
   for (let i = 0; i < 1; i++) {
     const coin = {
-      x: Math.floor(Math.random() * (WORLD_WIDTH * 2 + 1)) - WORLD_WIDTH,
-      y: Math.floor(Math.random() * (WORLD_HEIGHT * 2 + 1)) - WORLD_HEIGHT,
+      x: Math.floor(Math.random() * (roomId.mapWidth * 2 + 1)) - roomId.mapWidth,
+      y: Math.floor(Math.random() * (roomId.mapHeight * 2 + 1)) - roomId.mapHeight,
     };
     coins.push(coin);
   }
-  room.coins = coins;
+  roomId.coins = coins;
 
-  const coinsMessage = {
-    type: "coins",
-    coins: room.coins,
-  };
 
-  addToBatch(roomId, [coinsMessage]);
 }
 
-function handleCoinCollected(result, index) {
+function handleCoinCollected2(result, index) {
   const room = rooms.get(result.roomId);
   const playerId = result.playerId;
   const player = room.players.get(playerId);
@@ -313,23 +386,9 @@ function handleCoinCollected(result, index) {
       console.error("Error increasing coins:", error);
     });
 
-  // Create the messages for coin_collected and coins
-  const coinCollectedMessage = {
-    type: "coin_collected",
-    coinIndex: index,
-    playerId: playerId,
-  };
-
-  const coinsMessage = {
-    type: "coins",
-    coins: room.coins,
-  };
-
-  // Add both messages to the batch
-  addToBatch(result.roomId, [coinCollectedMessage, coinsMessage]);
-
+ 
   // Generate new random coins
-  generateRandomCoins(result.roomId);
+  generateRandomCoins(room);
 }
 
 const validDirections = [-90, 0, 180, -180, 90, 45, 135, -135, -45];
@@ -351,9 +410,17 @@ function handleRequest(result, message) {
       }
 
       if (data.type === "shoot") {
+
+        if (data.shoot_direction > -181 && data.shoot_direction < 181 ) {
         player.shoot_direction = parseFloat(data.shoot_direction);
-        handleBulletFired(result, player);
+        handleBulletFired(result.room, player);
+
+
+      } else {
+console.log(data.shoot_direction)
       }
+    }
+
 
     if (data.type === "pong") {
 
@@ -449,12 +516,12 @@ function handleRequest(result, message) {
 }
 
 module.exports = {
-  handleCoinCollected,
   joinRoom,
   addToBatch,
   sendBatchedMessages,
   createRoom,
   generateRandomCoins,
   handleRequest,
-  closeRoom
+  closeRoom,
+  handleCoinCollected2,
 };

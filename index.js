@@ -2,13 +2,15 @@ const WebSocket = require("ws");
 const http = require("http");
 const cors = require("cors");
 const axios = require("axios");
+const { MongoClient, ServerApiVersion } = require("mongodb");
+const jwt = require("jsonwebtoken");
 const { sanitize } = require("validator");
 const rateLimit = require("express-rate-limit");
 const LZString = require("lz-string");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
 
 const ConnectionOptionsRateLimit = {
-  points: 1, // Number of points
+  points: 10, // Number of points
   duration: 10, // Per second
 };
 
@@ -47,6 +49,54 @@ let connectedClientsCount = 0;
 let connectedUsernames = [];
 
 const Limiter = require("limiter").RateLimiter;
+
+
+process.on("SIGINT", function () {
+  mongoose.connection.close(function () {
+    console.log("Mongoose disconnected on app termination");
+    process.exit(0);
+  });
+});
+
+const password = process.env.DB_KEY || "8RLj5Vr3F6DRBAYc"
+const encodedPassword = encodeURIComponent(password);
+
+const uri = `mongodb+srv://Liquem:${encodedPassword}@cluster0.ed4zami.mongodb.net/?retryWrites=true&w=majority`;
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+    socketTimeoutMS: 30000,
+ //   maxConnecting: 2,
+   // maxIdleTimeMS: 300000,
+   // maxPoolSize: 100,
+    //minPoolSize: 0,
+  },
+});
+
+async function startServer() {
+  try {
+    // Connect to the MongoDB server
+    await client.connect();
+    console.log("Connected to MongoDB");
+
+    // Start the express server
+ 
+  } catch (err) {
+    console.error("Error connecting to MongoDB:", err);
+  }
+}
+
+startServer();
+
+const db = client.db("Cluster0");
+const userCollection = db.collection("users");
+const battlePassCollection = db.collection("battlepass_users");
+
+
 module.exports = {
   LZString,
   axios,
@@ -54,7 +104,15 @@ module.exports = {
   WebSocket,
   http,
   connectedUsernames,
+  MongoClient, 
+  ServerApiVersion,
+  db,
+  userCollection,
+  battlePassCollection,
+  jwt,
 };
+
+
 
 const bodyParser = require("body-parser");
 const {
@@ -310,12 +368,12 @@ server.on("upgrade", (request, socket, head) => {
 });
 
 process.on("uncaughtException", (error) => {
-  console.error("Uncaught Exception:", error);
+console.error("Uncaught Exception:", error);
 });
 
 // Global error handler for unhandled promise rejections
 process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection:", reason, promise);
+console.error("Unhandled Rejection:", reason, promise);
 });
 
 module.exports = {
