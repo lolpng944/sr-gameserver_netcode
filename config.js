@@ -7,7 +7,7 @@ const matchmaking_timeout = 300000;
 const player_idle_timeout = 60000;
 const WORLD_WIDTH = 800;
 const WORLD_HEIGHT = 800;
-const playerspeed = 0.22;
+const playerspeed = 0.16;
 const SHOOT_COOLDOWN = 100; 
 const BULLET_DAMAGE = 5;
 const game_start_time = 1000;
@@ -72,7 +72,7 @@ const weaponShootRange = {
 };
 
 const weaponCooldowns = {
-  1: 1000, 
+  1: 500, 
   2: 1500,
 };
 
