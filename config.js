@@ -77,7 +77,7 @@ const weaponCooldowns = {
 };
 
 const guns_damage = {
-  1: 1,
+  1: 5,
   2: 10,
 };
 
