@@ -320,6 +320,7 @@ function createRoom(roomId, height, width, gamemode, maxplayers) {
     zoneEndY: height,
     mapHeight: height,
     mapWidth: width,
+    walls: walls,
   };
 
   rooms.set(roomId, room);
