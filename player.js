@@ -197,6 +197,5 @@ function handlePlayerCollision(room, shootingPlayer, nearestObject, bullet_type,
 
 module.exports = {
   handleMovement,
-  handleBulletCollision,
   handlePlayerCollision,
 }
