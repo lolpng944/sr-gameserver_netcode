@@ -90,9 +90,9 @@ function handleMovement(result, player) {
 
 
   
-   const closestState = room.snap.reduce((prev, curr) => {
-    return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
-  });
+   //const closestState = room.snap.reduce((prev, curr) => {
+   // return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
+ // });
 
   
 
