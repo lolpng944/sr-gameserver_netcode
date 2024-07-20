@@ -90,17 +90,17 @@ function handleMovement(result, player) {
 
 
   
-   //const closestState = room.snap.reduce((prev, curr) => {
+  // const closestState = room.snap.reduce((prev, curr) => {
    // return (Math.abs(curr.timestamp - timestamp) < Math.abs(prev.timestamp - timestamp) ? curr : prev);
- // });
+  //});
 
   
 
 
 
-function handlePlayerCollision(room, shootingPlayer, nearestObject, bullet_type, shootdamagereduce) {
+function handlePlayerCollision(room, shootingPlayer, nearestObject, bullet_type, shootdamagereduce, damage) {
 
-  const GUN_BULLET_DAMAGE = Math.round(guns_damage[bullet_type] / shootdamagereduce );
+  const GUN_BULLET_DAMAGE = Math.round(damage / shootdamagereduce );
 
   // Update player's health
   nearestObject.health -= GUN_BULLET_DAMAGE;

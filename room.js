@@ -1,5 +1,5 @@
 const { LZString, axios, Limiter } = require('./index.js');
-const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORLD_HEIGHT, game_start_time, max_room_players, spawnPositions, batchedMessages, rooms, walls } = require('./config.js');
+const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORLD_HEIGHT, game_start_time, max_room_players, spawnPositions, batchedMessages, rooms, walls, gunsconfig } = require('./config.js');
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { connectedUsernames } = require('./index.js');
@@ -414,7 +414,7 @@ function handleRequest(result, message) {
 
         if (data.shoot_direction > -181 && data.shoot_direction < 181 ) {
         player.shoot_direction = parseFloat(data.shoot_direction);
-        handleBulletFired(result.room, player);
+        handleBulletFired(result.room, player, player.gun);
 
 
       } else {
@@ -441,11 +441,12 @@ console.log(data.shoot_direction)
 
       if (data.type === "switch_gun") {
   const selectedGunNumber = parseFloat(data.gun);
+  const allguns = Object.keys(gunsconfig).length;
   if (
     selectedGunNumber !== player.gun &&
     !player.shooting && // Check if the player is not shooting
     selectedGunNumber >= 1 &&
-    selectedGunNumber <= 2
+    selectedGunNumber <= allguns
   ) {
     // Check if the gun number is between 1 and 3
     player.gun = selectedGunNumber;

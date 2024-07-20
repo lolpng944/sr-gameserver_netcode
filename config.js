@@ -77,7 +77,7 @@ const weaponCooldowns = {
 };
 
 const guns_damage = {
-  1: 5,
+  1: 1,
   2: 10,
 };
 
@@ -88,6 +88,76 @@ const spawnPositions = [
   { x: 400, y: 400 },
   { x: 400, y: 450 },
 ];
+
+
+
+
+
+
+
+const gunsconfig = {
+  1: {
+    cooldown: 500, // in milliseconds
+    damage: 10,
+    bullets: [
+      { angle: 90, speed: 8, distance: 300, delay: 0, offset: 0 },
+      { angle: 0, speed: 8, distance: 300, delay: 0, offset: 0 },
+      { angle: 180, speed: 8, distance: 300, delay: 0, offset: 0 },
+      { angle: -90, speed: 8, distance: 300, delay: 0, offset: 0 },
+      { angle: 45, speed: 8, distance: 300, delay: 0, offset: 0 },
+      { angle: -45, speed: 8, distance: 300, delay: 0, offset: 0 },
+      { angle: -135, speed: 8, distance: 300, delay: 0, offset: 0 },
+      { angle: 135, speed: 8, distance: 300, delay: 0, offset: 0 }
+    ]
+  },
+  2: {
+    cooldown: 300,
+    damage: 15,
+    bullets: [
+      { angle: 0, speed: 10, distance: 500, extra: 0 },
+      { angle: 45, speed: 10, distance: 500, extra: 0 },
+      { angle: 90, speed: 10, distance: 500, extra: 0 },
+      { angle: 135, speed: 10, distance: 500, extra: 0 },
+      { angle: 180, speed: 10, distance: 500, extra: 0 },
+      { angle: -45, speed: 10, distance: 500, extra: 0 },
+      { angle: -90, speed: 10, distance: 500, extra: 0 },
+      { angle: -135, speed: 10, distance: 500, extra: 0 }
+    ]
+  },
+  3: {
+    cooldown: 700,
+    damage: 20,
+    bullets: [
+      { angle: 0, speed: 12, distance: 400, extra: 1 },
+      { angle: 120, speed: 12, distance: 400, extra: 1 },
+      { angle: 240, speed: 12, distance: 400, extra: 1 }
+    ]
+  },
+  4: {
+    cooldown: 600,
+    damage: 25,
+    bullets: [
+      { angle: 0, speed: 15, distance: 350, extra: 2 },
+      { angle: 60, speed: 15, distance: 350, extra: 2 },
+      { angle: 120, speed: 15, distance: 350, extra: 2 },
+      { angle: 180, speed: 15, distance: 350, extra: 2 },
+      { angle: -60, speed: 15, distance: 350, extra: 2 },
+      { angle: -120, speed: 15, distance: 350, extra: 2 }
+    ]
+  },
+  5: {
+    cooldown: 1000,
+    damage: 30,
+    bullets: [
+      { angle: 0, speed: 20, distance: 600, extra: 3 },
+      { angle: 90, speed: 20, distance: 600, extra: 3 },
+      { angle: 180, speed: 20, distance: 600, extra: 3 },
+      { angle: 270, speed: 20, distance: 600, extra: 3 }
+    ]
+  }
+};
+
+
 
 module.exports = {
   batchedMessages,
@@ -114,5 +184,6 @@ module.exports = {
   playerHitboxWidth, 
   playerHitboxHeight,
   maxmodeplayers,
-  all_gamemodes
+  all_gamemodes,
+  gunsconfig,
 };

@@ -1,3 +1,4 @@
+//"use strict";
 const WebSocket = require("ws");
 const http = require("http");
 const cors = require("cors");
@@ -129,6 +130,7 @@ const {
 } = require("./dbrequests");
 
 const { game_win_rest_time, maxClients, all_gamemodes } = require("./config");
+const { strict } = require("assert");
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,

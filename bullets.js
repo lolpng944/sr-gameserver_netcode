@@ -1,6 +1,6 @@
 const { calculateBulletEndpoint, isCollisionWithBullet } = require('./collisions');
 const { handleBulletCollision, handlePlayerCollision } = require('./player');
-const { weaponCooldowns, weaponShootRange, server_tick_rate, wallblocksize, playerHitboxHeight, playerHitboxWidth } = require('./config');
+const { weaponCooldowns, weaponShootRange, server_tick_rate, wallblocksize, playerHitboxHeight, playerHitboxWidth, gunsconfig } = require('./config');
 const { json } = require('body-parser');
 
 
@@ -26,9 +26,9 @@ function isCollisionWithPlayer(bullet, player) {
 }
 
 
-function moveBullet(room, player, playerspeed, direction, timestamp, maxDistance) {
+function moveBullet(room, player, playerspeed, direction, timestamp, maxDistance, bullet) {
   // Find the bullet with the specific rayid (assuming rayid is a timestamp or unique identifier)
-  const bullet = player.bullets.find(bullet => bullet.timestamp === timestamp);
+  //const bullet = player.bullets.find(bullet => bullet.timestamp === timestamp);
 
   if (!bullet) {
     console.log(`Bullet timestamp not found.`);
@@ -63,7 +63,7 @@ try {
       if (otherPlayer !== player && otherPlayer.visible && isCollisionWithPlayer(bullet, otherPlayer)) {
         const number = distanceTraveled / maxDistance + 0.5;
         const shootdistance =  number.toFixed(1)
-        handlePlayerCollision(room, player, otherPlayer, 1, shootdistance); // Handle bullet collision
+        handlePlayerCollision(room, player, otherPlayer, 1, shootdistance, bullet.damage); // Handle bullet collision
 
         player.bullets = player.bullets.filter(b => b.timestamp !== timestamp);
        
@@ -84,16 +84,16 @@ try {
 }
 
 
-function shootBulletsWithDelay(room, player, direction, speed, length, delay, yOffset) {
+function shootBulletsWithDelay(room, player, direction, speed, length, delay, yOffset, damage) {
   return new Promise((resolve) => {
     setTimeout(() => {
-      shootBullet(room, player, direction, speed, length, yOffset);
+      shootBullet(room, player, direction, speed, length, yOffset, damage);
       resolve();
     }, delay);
   });
 }
 
-function shootBullet(room, player, direction, speed, maxDistance, yOffset) {
+function shootBullet(room, player, direction, speed, maxDistance, yOffset, damage) {
   return new Promise(async (resolve) => {
 
     const radians = (direction * Math.PI) / 180;
@@ -108,12 +108,13 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset) {
       startY: player.y + yOffsetAdjusted,
       direction: direction,
       timestamp: randomPart,
+      damage: damage,
     };
 
     player.bullets.push(bullet);
 
     while (true) {
-      moveBullet(room, player, speed, direction, bullet.timestamp, maxDistance);
+      moveBullet(room, player, speed, direction, bullet.timestamp, maxDistance, bullet);
       const currentBullet = player.bullets.find(b => b.timestamp === bullet.timestamp);
       if (!currentBullet) {
         break;
@@ -126,11 +127,12 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset) {
 }
 
 
-async function handleBulletFired(room, player) {
+async function handleBulletFired(room, player, gunType) {
+  const gun = gunsconfig[gunType];
 
   const currentTime = Date.now();
   const lastShootTime = player.lastShootTime || 0;
-  const shootCooldown = weaponCooldowns[player.gun];
+  const shootCooldown = gunsconfig[gunType].cooldown;
 
  if (player.shooting || currentTime - lastShootTime < shootCooldown) {
   return;
@@ -139,7 +141,11 @@ async function handleBulletFired(room, player) {
   player.shooting = true;
   player.lastShootTime = currentTime;
 
-  shootBullet(room, player, 90, 8, 300, 0);
+  gun.bullets.forEach(bullet => {
+    shootBulletsWithDelay(room, player, bullet.angle, bullet.speed, bullet.distance, bullet.delay, bullet.offset, gun.damage);
+  });
+
+  /*shootBullet(room, player, 90, 8, 300, 0);
   shootBullet(room, player, 0, 8, 300, 0);
   shootBullet(room, player, 180, 8, 300, 0);
   shootBullet(room, player, -90, 8, 300, 0);
@@ -148,6 +154,7 @@ async function handleBulletFired(room, player) {
   shootBullet(room, player, -135, 8, 300, 0);
   shootBullet(room, player, 135, 8, 300, 0);
 
+  */
  //shootBulletsWithDelay(room, player, player.shoot_direction, 8, 300, 0, 10);
 // shootBulletsWithDelay(room, player, player.shoot_direction, 8, 300, 100, -10);
  // shootBulletsWithDelay(room, player, player.shoot_direction, 8, 300, 200, 10);
