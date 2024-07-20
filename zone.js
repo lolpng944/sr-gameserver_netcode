@@ -112,10 +112,10 @@ function UseZone(room) {
   room.zoneEndY += room.mapHeight / 2
  
     room.shrinkInterval = setInterval(() => shrinkZone(room), 250);
-    pingPlayers(room);
+   /*pingPlayers(room);
  
-    room.snapInterval = setInterval(() => {
-      saveRoomState(room);
+   room.snapInterval = setInterval(() => {
+     saveRoomState(room);
     }, server_tick_rate - 2); 
   room.pinger = setInterval(() => {
       // Ensure sendping is undefined before calling pingPlayers again
@@ -123,6 +123,7 @@ function UseZone(room) {
           pingPlayers(room);
       }
   }, 1000);
+  */
 
     
 };
