@@ -100,7 +100,9 @@ function handleMovement(result, player) {
 
 function handlePlayerCollision(room, shootingPlayer, nearestObject, bullet_type, shootdamagereduce, damage) {
 
-  const GUN_BULLET_DAMAGE = Math.round(damage / shootdamagereduce );
+ // const GUN_BULLET_DAMAGE = Math.round(damage / shootdamagereduce );
+
+    const GUN_BULLET_DAMAGE = damage
 
   // Update player's health
   nearestObject.health -= GUN_BULLET_DAMAGE;
