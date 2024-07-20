@@ -114,12 +114,12 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset, damag
     player.bullets.push(bullet);
 
     while (true) {
-      moveBullet(room, player, speed, direction, bullet.timestamp, maxDistance, bullet);
+      moveBullet(room, player, speed * 2, direction, bullet.timestamp, maxDistance, bullet);
       const currentBullet = player.bullets.find(b => b.timestamp === bullet.timestamp);
       if (!currentBullet) {
         break;
       }
-      await new Promise(resolve => setTimeout(resolve, server_tick_rate));
+      await new Promise(resolve => setTimeout(resolve, server_tick_rate * 2));
     }
 
     resolve();
