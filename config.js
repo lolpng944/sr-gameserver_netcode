@@ -99,6 +99,7 @@ const gunsconfig = {
   1: {
     cooldown: 500, // in milliseconds
     damage: 10,
+    useplayerangle: false,
     bullets: [
       { angle: 90, speed: 8, distance: 300, delay: 0, offset: 0 },
       { angle: 0, speed: 8, distance: 300, delay: 0, offset: 0 },
@@ -111,48 +112,15 @@ const gunsconfig = {
     ]
   },
   2: {
-    cooldown: 300,
-    damage: 15,
-    bullets: [
-      { angle: 0, speed: 10, distance: 500, extra: 0 },
-      { angle: 45, speed: 10, distance: 500, extra: 0 },
-      { angle: 90, speed: 10, distance: 500, extra: 0 },
-      { angle: 135, speed: 10, distance: 500, extra: 0 },
-      { angle: 180, speed: 10, distance: 500, extra: 0 },
-      { angle: -45, speed: 10, distance: 500, extra: 0 },
-      { angle: -90, speed: 10, distance: 500, extra: 0 },
-      { angle: -135, speed: 10, distance: 500, extra: 0 }
-    ]
-  },
-  3: {
-    cooldown: 700,
-    damage: 20,
-    bullets: [
-      { angle: 0, speed: 12, distance: 400, extra: 1 },
-      { angle: 120, speed: 12, distance: 400, extra: 1 },
-      { angle: 240, speed: 12, distance: 400, extra: 1 }
-    ]
-  },
-  4: {
-    cooldown: 600,
-    damage: 25,
-    bullets: [
-      { angle: 0, speed: 15, distance: 350, extra: 2 },
-      { angle: 60, speed: 15, distance: 350, extra: 2 },
-      { angle: 120, speed: 15, distance: 350, extra: 2 },
-      { angle: 180, speed: 15, distance: 350, extra: 2 },
-      { angle: -60, speed: 15, distance: 350, extra: 2 },
-      { angle: -120, speed: 15, distance: 350, extra: 2 }
-    ]
-  },
-  5: {
     cooldown: 1000,
-    damage: 30,
+    damage: 15,
+    useplayerangle: true,
     bullets: [
-      { angle: 0, speed: 20, distance: 600, extra: 3 },
-      { angle: 90, speed: 20, distance: 600, extra: 3 },
-      { angle: 180, speed: 20, distance: 600, extra: 3 },
-      { angle: 270, speed: 20, distance: 600, extra: 3 }
+      { angle: 0, speed: 10, distance: 500, delay: 0, offset: 0 },
+      { angle: 20, speed: 10, distance: 500, delay: 100, offset: 0 },
+      { angle: -20, speed: 10, distance: 500, delay: 200, offset: 0 },
+      { angle: 40, speed: 10, distance: 500, delay: 300, offset: 0 },
+      { angle: -40, speed: 10, distance: 500, delay: 400, offset: 0 }
     ]
   }
 };
