@@ -234,17 +234,15 @@ return Math.sqrt(
   batchedMessages.set(roomId, []); // Clear the batch after sending
 }
 */
-
 function sendBatchedMessages(roomId) {
   const room = rooms.get(roomId);
 
+  // Prepare new player data and changes
+  const playerDataChanges = {};
+  const playerData = {};
 
-
-  const playerData = Array.from(room.players.values()).reduce((acc, player) => {
-
+  Array.from(room.players.values()).forEach(player => {
     if (player.visible !== false) {
-      
-      
       const formattedBullets = player.bullets.reduce((acc, bullet) => {
         acc[bullet.timestamp] = {
           x: bullet.x,
@@ -254,7 +252,8 @@ function sendBatchedMessages(roomId) {
         return acc;
       }, {});
 
-      acc[player.playerId] = {
+      // Create current player data object
+      const currentPlayerData = {
         x: player.x,
         y: player.y,
         direction: player.direction,
@@ -263,48 +262,88 @@ function sendBatchedMessages(roomId) {
         gun: player.gun,
         ping: player.ping,
         hitdata: player.hitdata,
-        bullets: formattedBullets,
+        bullets: formattedBullets, // Always include bullets
       };
-
 
       // Include additional properties only when room state is not "playing"
       if (room.state !== "playing") {
-        acc[player.playerId].hat = player.hat;
-        acc[player.playerId].top = player.top;
-        acc[player.playerId].player_color = player.player_color;
-        acc[player.playerId].hat_color = player.hat_color;
-        acc[player.playerId].top_color = player.top_color;
+        currentPlayerData.hat = player.hat;
+        currentPlayerData.top = player.top;
+        currentPlayerData.player_color = player.player_color;
+        currentPlayerData.hat_color = player.hat_color;
+        currentPlayerData.top_color = player.top_color;
+      }
+
+      playerData[player.playerId] = currentPlayerData;
+
+      if (room.state === "playing") {
+        // Track changes if state is "playing"
+        const previousPlayerData = room.lastSentPlayerData?.[player.playerId] || {};
+        const changes = {};
+
+        // Only check for changes in non-bullets data
+        Object.keys(currentPlayerData).forEach(key => {
+          if (key !== 'bullets' && key !== 'shooting') {
+            if (JSON.stringify(currentPlayerData[key]) !== JSON.stringify(previousPlayerData[key])) {
+              changes[key] = currentPlayerData[key];
+            }
+          }
+        });
+
+        // Always include bullets changes
+        changes.bullets = currentPlayerData.bullets;
+        changes.shooting = currentPlayerData.shooting;
+
+        if (Object.keys(changes).length > 0) {
+          playerDataChanges[player.playerId] = changes;
+        }
       }
     }
+  });
 
-    return acc;
-  }, {});
-
+  // Create the new message based on room state
   const newMessage = {
-    ...playerData ? { playerData } : {},
-    //coins: room.coins,
+    playerData: room.state === "playing" ? playerDataChanges : playerData,
     state: room.state,
-    z: room.zone,
-    pl: room.maxplayers,
-    pg: room.sendping,
-    rp: room.players.size,
-    //coins: room.coins,
-    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
+    ...(room.lastSent?.zone !== room.zone ? { z: room.zone } : {}),
+    ...(room.lastSent?.maxplayers !== room.maxplayers ? { pl: room.maxplayers } : {}),
+    ...(room.lastSent?.sendping !== room.sendping ? { pg: room.sendping } : {}),
+    ...(room.lastSent?.playersSize !== room.players.size ? { rp: room.players.size } : {}),
+    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { eliminatedPlayers: room.eliminatedPlayers } : {}),
   };
 
   const jsonString = JSON.stringify(newMessage);
   const compressedString = LZString.compressToUint8Array(jsonString);
 
+  // Check if the message has changed
   if (room.lastSentMessage !== jsonString) {
-    room.players.forEach((player) => {
-      player.ws.send(compressedString, { binary: true });
+    room.players.forEach(player => {
+      if (player.ws) {
+        player.ws.send(compressedString, { binary: true });
+      }
     });
 
     room.lastSentMessage = jsonString;
+    room.lastSentPlayerData = playerData;
+  
+
+
+    // Update the last sent message and player data
+    room.lastSent = {
+      zone: room.zone,
+      maxplayers: room.maxplayers,
+      sendping: room.sendping,
+      playersSize: room.players.size,
+      state: room.state,
+    };
   }
 
+
   batchedMessages.set(roomId, []); // Clear the batch after sending
-} 
+}
+
+
+
 
 // Utility function to calculate distance between two points
 function getDistance(x1, y1, x2, y2) {
