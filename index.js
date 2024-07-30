@@ -255,11 +255,10 @@ wss.on("connection", (ws, req) => {
 
         ws.on("message", (message) => {
          // const sanitizedMessage = sanitize(message);
-          if (result.room.players.has(result.playerId) && message.length < 200) {
-            const player = result.room.players.get(result.playerId);
-            if (player.rateLimiter.tryRemoveTokens(1)) {
+         const player = result.room.players.get(result.playerId);
+          if (result.room.players.has(result.playerId) && message.length < 200 && player.rateLimiter.tryRemoveTokens(1)) {    
               handleRequest(result, message);
-            }
+            
           } else {
             console.log("Player not found in the room.");
           }
@@ -383,7 +382,7 @@ module.exports = {
 };
 
 
-const PORT = process.env.PORT || 8070;
+const PORT = process.env.PORT || 8080;
 
 server.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);

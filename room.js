@@ -114,6 +114,7 @@ async function joinRoom(ws, token, gamemode) {
         shoot_direction: 90,
         gun: 1,
         bullets: [],
+        spectatingPlayer: playerId
       });
 
       // Handle room state transitions and game start
@@ -242,14 +243,16 @@ function sendBatchedMessages(roomId) {
   const playerData = Array.from(room.players.values()).reduce((acc, player) => {
 
     if (player.visible !== false) {
-
-      const formattedBullets = player.bullets.map(bullet => ({
-        x: bullet.x,
-        y: bullet.y,
-        d: bullet.direction
-      }));
-     
       
+      
+      const formattedBullets = player.bullets.reduce((acc, bullet) => {
+        acc[bullet.timestamp] = {
+          x: bullet.x,
+          y: bullet.y,
+          d: bullet.direction,
+        };
+        return acc;
+      }, {});
 
       acc[player.playerId] = {
         x: player.x,
@@ -302,6 +305,13 @@ function sendBatchedMessages(roomId) {
 
   batchedMessages.set(roomId, []); // Clear the batch after sending
 } 
+
+// Utility function to calculate distance between two points
+function getDistance(x1, y1, x2, y2) {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
+
 
 
 function createRoom(roomId, height, width, gamemode, maxplayers) {
@@ -435,8 +445,16 @@ console.log(data.shoot_direction)
     }
 }
 
+
       
-       
+if (data.type === "spectate") {
+  const timestamp = new Date().getTime();
+
+  if (!player.visible && result.room.players.has(data.name)) {
+    player.spectatingPlayer = data.name;
+    console.log("true");
+  }
+}
 
 
       if (data.type === "switch_gun") {

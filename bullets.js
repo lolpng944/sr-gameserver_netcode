@@ -31,7 +31,7 @@ function moveBullet(room, player, playerspeed, direction, timestamp, maxDistance
   //const bullet = player.bullets.find(bullet => bullet.timestamp === timestamp);
 
   if (!bullet) {
-    console.log(`Bullet timestamp not found.`);
+    console.log("Bullet timestamp not found.");
 
     return; // Exit function if bullet with rayid is not found
   }
@@ -45,6 +45,7 @@ function moveBullet(room, player, playerspeed, direction, timestamp, maxDistance
   const newY = Math.round(bullet.y + yDelta);
 
   const distanceTraveled = Math.sqrt(Math.pow(newX - bullet.startX, 2) + Math.pow(newY - bullet.startY, 2));
+  
 
   //console.log(room.players);
 
@@ -52,10 +53,6 @@ function moveBullet(room, player, playerspeed, direction, timestamp, maxDistance
   if (!isCollisionWithBullet(room.walls, newX, newY) && distanceTraveled <= maxDistance) {
     bullet.x = newX;
     bullet.y = newY;
-
-
-
-
    
 try {
 
@@ -63,9 +60,9 @@ try {
       if (otherPlayer !== player && otherPlayer.visible && isCollisionWithPlayer(bullet, otherPlayer)) {
         const number = distanceTraveled / maxDistance + 0.5;
         const shootdistance =  number.toFixed(1)
-        handlePlayerCollision(room, player, otherPlayer, 1, shootdistance, bullet.damage); // Handle bullet collision
+        handlePlayerCollision(room, player, otherPlayer, shootdistance, bullet.damage); // Handle bullet collision
 
-        player.bullets = player.bullets.filter(b => b.timestamp !== timestamp);
+       player.bullets = player.bullets.filter(b => b.timestamp !== timestamp);
        
         return;
       }
@@ -77,7 +74,7 @@ try {
   }
    
   } else {
-    player.bullets = player.bullets.filter(b => b.timestamp !== timestamp);
+  player.bullets = player.bullets.filter(b => b.timestamp !== timestamp);
  
 }
 
@@ -101,6 +98,8 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset, damag
     const yOffsetAdjusted = yOffset * Math.sin(radians);
     const randomPart = Math.random().toString(36).substring(2, 15);
 
+   
+
     const bullet = {
       x: player.x + xOffset,
       y: player.y + yOffsetAdjusted,
@@ -114,12 +113,12 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset, damag
     player.bullets.push(bullet);
 
     while (true) {
-      moveBullet(room, player, speed * 2, direction, bullet.timestamp, maxDistance, bullet);
+      moveBullet(room, player, speed, direction, bullet.timestamp, maxDistance, bullet);
       const currentBullet = player.bullets.find(b => b.timestamp === bullet.timestamp);
       if (!currentBullet) {
         break;
       }
-      await new Promise(resolve => setTimeout(resolve, server_tick_rate * 2));
+      await new Promise(resolve => setTimeout(resolve, 18));
     }
 
     resolve();
@@ -146,34 +145,22 @@ async function handleBulletFired(room, player, gunType) {
     definedAngle = player.shoot_direction;
   }
 
+  
+
+
 
    gun.bullets.forEach(bullet => {
+    
         const finalAngle = gun.useplayerangle === true ? bullet.angle + definedAngle : bullet.angle;
         shootBulletsWithDelay(room, player, finalAngle, bullet.speed, bullet.distance, bullet.delay, bullet.offset, gun.damage);
     });
-  
+
    
-  
-  /*shootBullet(room, player, 90, 8, 300, 0);
-  shootBullet(room, player, 0, 8, 300, 0);
-  shootBullet(room, player, 180, 8, 300, 0);
-  shootBullet(room, player, -90, 8, 300, 0);
-  shootBullet(room, player, 45, 8, 300, 0);
-  shootBullet(room, player, -45, 8, 300, 0);
-  shootBullet(room, player, -135, 8, 300, 0);
-  shootBullet(room, player, 135, 8, 300, 0);
-
-  */
- //shootBulletsWithDelay(room, player, player.shoot_direction, 8, 300, 0, 10);
-// shootBulletsWithDelay(room, player, player.shoot_direction, 8, 300, 100, -10);
- // shootBulletsWithDelay(room, player, player.shoot_direction, 8, 300, 200, 10);
-  //shootBulletsWithDelay(room, player, player.shoot_direction, 8, 300, 300, -10);
-
-
     setTimeout(() => {
       player.shooting = false;
     }, shootCooldown);
   }
+
 
 
 module.exports = {

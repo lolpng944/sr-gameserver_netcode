@@ -7,7 +7,7 @@ const matchmaking_timeout = 300000;
 const player_idle_timeout = 60000;
 const WORLD_WIDTH = 800;
 const WORLD_HEIGHT = 800;
-const playerspeed = 0.22;
+const playerspeed = 0.18;
 const SHOOT_COOLDOWN = 100; 
 const BULLET_DAMAGE = 5;
 const game_start_time = 1000;
@@ -98,20 +98,33 @@ const spawnPositions = [
 const gunsconfig = {
   1: {
     cooldown: 500, // in milliseconds
-    damage: 10,
+    damage: 5,
     useplayerangle: false,
     bullets: [
-      { angle: 90, speed: 8, distance: 300, delay: 0, offset: 0 },
-      { angle: 0, speed: 8, distance: 300, delay: 0, offset: 0 },
-      { angle: 180, speed: 8, distance: 300, delay: 0, offset: 0 },
-      { angle: -90, speed: 8, distance: 300, delay: 0, offset: 0 },
-      { angle: 45, speed: 8, distance: 300, delay: 0, offset: 0 },
-      { angle: -45, speed: 8, distance: 300, delay: 0, offset: 0 },
-      { angle: -135, speed: 8, distance: 300, delay: 0, offset: 0 },
-      { angle: 135, speed: 8, distance: 300, delay: 0, offset: 0 }
+      { angle: 90, speed: 13, distance: 200, delay: 0, offset: 0 },
+      { angle: 0, speed: 13, distance: 200, delay: 0, offset: 0 },
+      { angle: 180, speed: 13, distance: 200, delay: 0, offset: 0 },
+      { angle: -90, speed: 13, distance: 200, delay: 0, offset: 0 },
+      { angle: 45, speed: 13, distance: 200, delay: 0, offset: 0 },
+      { angle: -45, speed: 13, distance: 200, delay: 0, offset: 0 },
+      { angle: -135, speed: 13, distance: 200, delay: 0, offset: 0 },
+      { angle: 135, speed: 13, distance: 200, delay: 0, offset: 0 }
     ]
   },
   2: {
+    cooldown: 1000,
+    damage: 2,
+    useplayerangle: true,
+    bullets: [
+      { angle: 0, speed: 18, distance: 300, delay: 0, offset: -10 },
+      { angle: 0, speed: 18, distance: 300, delay: 100, offset: 10 },
+      { angle: 0, speed: 18, distance: 300, delay: 200, offset: -10 },
+      { angle: 0, speed: 18, distance: 300, delay: 300, offset: 10 },
+      { angle: 0, speed: 18, distance: 300, delay: 400, offset: -10 }
+
+    ]
+  },
+  3: {
     cooldown: 1000,
     damage: 15,
     useplayerangle: true,
@@ -122,7 +135,7 @@ const gunsconfig = {
       { angle: 40, speed: 10, distance: 500, delay: 300, offset: 0 },
       { angle: -40, speed: 10, distance: 500, delay: 400, offset: 0 }
     ]
-  }
+  },
 };
 
 

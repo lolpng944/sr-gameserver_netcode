@@ -30,7 +30,7 @@ function isWithinZone(room, playerX, playerY) {
     return playerX - 40 >= room.zoneStartX && playerX + 40 <= room.zoneEndX &&
            playerY - 60  >= room.zoneStartY && playerY + 60 <= room.zoneEndY;
 }
-shrinkspeed = 1.7 / 1000
+shrinkspeed = 3.7 / 1000
 // Function to shrink the game zone
 function shrinkZone(room) {
    dealDamage(room);
@@ -62,24 +62,23 @@ function shrinkZone(room) {
 
 function dealDamage(room) {
     room.players.forEach((player) => {
-         if (player.visible !== false && !isWithinZone(room, player.x, player.y)) {
-        if (!isWithinZone(room, player.x, player.y)) {
-            if (1 > player.health) {
-           handleElimination(room, player);
-               
-        } else {
+         
+        if (player.visible !== false && !isWithinZone(room, player.x, player.y)) {
+
                 if (room.winner === 0) {
             player.health -= 5;
             player.last_hit_time = new Date().getTime();
-                }
-                 }
+            if (1 > player.health) {
+              handleElimination(room, player);
+            
+          
+            }
+          }
+      }
+  });
 }
-        } else {
-
-            // Implement player health deduction logic here if needed
-        }
-    });
-}
+             
+         
 
 function pingPlayers(room) {
   // First setTimeout
@@ -112,10 +111,10 @@ function UseZone(room) {
   room.zoneEndY += room.mapHeight / 2
  
     room.shrinkInterval = setInterval(() => shrinkZone(room), 250);
-   /*pingPlayers(room);
+   /* pingPlayers(room);
  
-   room.snapInterval = setInterval(() => {
-     saveRoomState(room);
+    room.snapInterval = setInterval(() => {
+      saveRoomState(room);
     }, server_tick_rate - 2); 
   room.pinger = setInterval(() => {
       // Ensure sendping is undefined before calling pingPlayers again
@@ -123,6 +122,7 @@ function UseZone(room) {
           pingPlayers(room);
       }
   }, 1000);
+
   */
 
     
