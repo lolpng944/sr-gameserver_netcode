@@ -174,67 +174,77 @@ return Math.sqrt(
 
 }
 
-/*function sendBatchedMessages(roomId) {
+function sendBatchedMessages(roomId) {
   const room = rooms.get(roomId);
-  if (!room) return;
-
-  room.players.forEach((player) => {
-    if (!player.visible) return; // Skip players where visible is false
-
-    const playerData = Array.from(room.players.values()).reduce((acc, otherPlayer) => {
-      if (!otherPlayer.visible) return acc; // Skip other players where visible is false
 
 
-     
 
-      if (!player.visible || player.playerId === otherPlayer.playerId || getDistance(player.x, player.y, otherPlayer.x, otherPlayer.y) <= 380) {
-        acc[otherPlayer.playerId] = {
-          x: otherPlayer.x,
-          y: otherPlayer.y,
-          direction: otherPlayer.direction,
-          health: otherPlayer.health,
-          shooting: otherPlayer.shooting,
-          gun: otherPlayer.gun,
-          ping: otherPlayer.ping,
-          hitdata: otherPlayer.hitdata,
+  const playerData = Array.from(room.players.values()).reduce((acc, player) => {
+
+    if (player.visible !== false) {
+      
+      
+      const formattedBullets = player.bullets.reduce((acc, bullet) => {
+        acc[bullet.timestamp] = {
+          x: bullet.x,
+          y: bullet.y,
+          d: bullet.direction,
         };
+        return acc;
+      }, {});
 
-        // Include additional properties only when room state is not "playing"
-        if (room.state !== "playing") {
-          acc[otherPlayer.playerId].hat = otherPlayer.hat;
-          acc[otherPlayer.playerId].top = otherPlayer.top;
-          acc[otherPlayer.playerId].player_color = otherPlayer.player_color;
-          acc[otherPlayer.playerId].hat_color = otherPlayer.hat_color;
-          acc[otherPlayer.playerId].top_color = otherPlayer.top_color;
-        }
+      acc[player.playerId] = {
+        x: player.x,
+        y: player.y,
+        direction: player.direction,
+        health: player.health,
+        shooting: player.shooting,
+        gun: player.gun,
+        ping: player.ping,
+        hitdata: player.hitdata,
+        bullets: formattedBullets,
+      };
+
+
+      // Include additional properties only when room state is not "playing"
+      if (room.state !== "playing") {
+        acc[player.playerId].hat = player.hat;
+        acc[player.playerId].top = player.top;
+        acc[player.playerId].player_color = player.player_color;
+        acc[player.playerId].hat_color = player.hat_color;
+        acc[player.playerId].top_color = player.top_color;
       }
-      return acc;
-    }, {});
-
-    const newMessage = {
-      playerData,
-      coins: room.coins,
-      state: room.state,
-      z: room.zone,
-      pl: room.maxplayers,
-      pg: room.sendping,
-      rp: room.players.size,
-      ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { eliminatedPlayers: room.eliminatedPlayers } : {}),
-    };
-
-    const jsonString = JSON.stringify(newMessage);
-    const compressedString = LZString.compressToUint8Array(jsonString);
-
-    if (player.lastSentMessage !== jsonString) {
-      player.ws.send(compressedString, { binary: true });
-      player.lastSentMessage = jsonString;
     }
-  });
+
+    return acc;
+  }, {});
+
+  const newMessage = {
+    ...playerData ? { playerData } : {},
+    //coins: room.coins,
+    state: room.state,
+    z: room.zone,
+    pl: room.maxplayers,
+    pg: room.sendping,
+    rp: room.players.size,
+    //coins: room.coins,
+    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { eliminatedPlayers: room.eliminatedPlayers } : {},
+  };
+
+  const jsonString = JSON.stringify(newMessage);
+  const compressedString = LZString.compressToUint8Array(jsonString);
+
+  if (room.lastSentMessage !== jsonString) {
+    room.players.forEach((player) => {
+      player.ws.send(compressedString, { binary: true });
+    });
+
+    room.lastSentMessage = jsonString;
+  }
 
   batchedMessages.set(roomId, []); // Clear the batch after sending
-}
-*/
-function sendBatchedMessages(roomId) {
+} 
+/*function sendBatchedMessages(roomId) {
   const room = rooms.get(roomId);
 
   // Prepare new player data and changes
@@ -342,6 +352,7 @@ function sendBatchedMessages(roomId) {
   batchedMessages.set(roomId, []); // Clear the batch after sending
 }
 
+*/
 
 
 
