@@ -173,7 +173,7 @@ return Math.sqrt(
   );
 
 }
-
+/*
 function sendBatchedMessages(roomId) {
   const room = rooms.get(roomId);
 
@@ -196,13 +196,13 @@ function sendBatchedMessages(roomId) {
       acc[player.playerId] = {
         x: player.x,
         y: player.y,
-        direction: player.direction,
-        health: player.health,
-        shooting: player.shooting,
-        gun: player.gun,
+        d: player.direction,
+        h: player.health,
+        s: player.shooting,
+        g: player.gun,
         ping: player.ping,
-        hitdata: player.hitdata,
-        bullets: formattedBullets,
+        hd: player.hitdata,
+        b: formattedBullets,
       };
 
 
@@ -244,7 +244,9 @@ function sendBatchedMessages(roomId) {
 
   batchedMessages.set(roomId, []); // Clear the batch after sending
 } 
-/*function sendBatchedMessages(roomId) {
+
+*/
+function sendBatchedMessages(roomId) {
   const room = rooms.get(roomId);
 
   // Prepare new player data and changes
@@ -316,9 +318,9 @@ function sendBatchedMessages(roomId) {
     playerData: room.state === "playing" ? playerDataChanges : playerData,
     state: room.state,
     ...(room.lastSent?.zone !== room.zone ? { z: room.zone } : {}),
-    ...(room.lastSent?.maxplayers !== room.maxplayers ? { pl: room.maxplayers } : {}),
-    ...(room.lastSent?.sendping !== room.sendping ? { pg: room.sendping } : {}),
-    ...(room.lastSent?.playersSize !== room.players.size ? { rp: room.players.size } : {}),
+    pl: room.maxplayers,
+   // ...(room.lastSent?.sendping !== room.sendping ? { pg: room.sendping } : {}),
+    rp: room.players.size,
     ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { eliminatedPlayers: room.eliminatedPlayers } : {}),
   };
 
@@ -342,7 +344,7 @@ function sendBatchedMessages(roomId) {
     room.lastSent = {
       zone: room.zone,
       maxplayers: room.maxplayers,
-      sendping: room.sendping,
+     // sendping: room.sendping,
       playersSize: room.players.size,
       state: room.state,
     };
@@ -352,7 +354,7 @@ function sendBatchedMessages(roomId) {
   batchedMessages.set(roomId, []); // Clear the batch after sending
 }
 
-*/
+
 
 
 
