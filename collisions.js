@@ -70,10 +70,10 @@ function isCollisionWithBullet(walls, x, y) {
   // Check for collision with each nearby wall
   for (const wall of nearbyWalls) {
     // Consider adjusting the collision detection logic based on the shape of walls
-    const wallLeft = wall.x - wallblocksize + 1 / 2;
-    const wallRight = wall.x + wallblocksize + 1 / 2;
-    const wallTop = wall.y - wallblocksize + 1 / 2;
-    const wallBottom = wall.y + wallblocksize + 1 / 2;
+    const wallLeft = wall.x - wallblocksize / 2;
+    const wallRight = wall.x + wallblocksize / 2;
+    const wallTop = wall.y - wallblocksize / 2;
+    const wallBottom = wall.y + wallblocksize / 2;
 
     // Adjust the collision condition based on the specific requirements of your walls
     if (
