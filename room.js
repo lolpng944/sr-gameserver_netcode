@@ -274,6 +274,7 @@ function sendBatchedMessages(roomId) {
         gun: player.gun,
         ping: player.ping,
         hitdata: player.hitdata,
+        ell: player.elimlast,
         bullets: formattedBullets, // Always include bullets
       };
 
@@ -305,6 +306,7 @@ function sendBatchedMessages(roomId) {
         // Always include bullets changes
         changes.bullets = currentPlayerData.bullets;
         changes.shooting = currentPlayerData.shooting;
+        changes.ell = currentPlayerData.ell;
 
         if (Object.keys(changes).length > 0) {
           playerDataChanges[player.playerId] = changes;
