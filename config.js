@@ -56,7 +56,7 @@ const teleporters = [
 ];
 
 const maxmodeplayers = {
-  1: 1, 
+  1: 3, 
   2: 2, 
 };
 
