@@ -11,8 +11,8 @@ const LZString = require("lz-string");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
 
 const ConnectionOptionsRateLimit = {
-  points: 10, // Number of points
-  duration: 10, // Per second
+  points: 1, // Number of points
+  duration: 5, // Per second
 };
 
 const express = require("express");
