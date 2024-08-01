@@ -101,7 +101,7 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset, damag
     const xOffset = yOffset * Math.cos(radians);
     const yOffsetAdjusted = yOffset * Math.sin(radians);
     const length = 5,
-    const randomPart = Math.random().toString(36).substring(2, 2 + length);
+    const randomPart = Math.random().toString(36).substring(2, 2 + 5);
 
    
 
