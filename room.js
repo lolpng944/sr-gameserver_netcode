@@ -280,11 +280,11 @@ function sendBatchedMessages(roomId) {
 
       // Include additional properties only when room state is not "playing"
       if (room.state !== "playing") {
-        currentPlayerData.1 = player.hat;
-        currentPlayerData.2 = player.top;
-        currentPlayerData.3 = player.player_color;
-        currentPlayerData.4 = player.hat_color;
-        currentPlayerData.5 = player.top_color;
+        currentPlayerData.ht = player.hat;
+        currentPlayerData.tp = player.top;
+        currentPlayerData.pc = player.player_color;
+        currentPlayerData.hc = player.hat_color;
+        currentPlayerData.tc = player.top_color;
       }
 
       playerData[player.playerId] = currentPlayerData;
