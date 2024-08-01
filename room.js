@@ -308,6 +308,7 @@ function sendBatchedMessages(roomId) {
         changes.shooting = currentPlayerData.shooting;
         changes.direction = currentPlayerData.direction;
         changes.health = currentPlayerData.health;
+        changes.gun = currentPlayerData.gun;
         changes.ell = currentPlayerData.ell;
 
         if (Object.keys(changes).length > 0) {
