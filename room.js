@@ -268,7 +268,7 @@ function sendBatchedMessages(roomId) {
       const currentPlayerData = {
         x: player.x,
         y: player.y,
-        d: player.direction,
+        dr: player.direction,
         h: player.health,
         s: player.shooting,
         g: player.gun,
@@ -306,7 +306,7 @@ function sendBatchedMessages(roomId) {
         // Always include bullets changes
         changes.b = currentPlayerData.b;
         changes.s = currentPlayerData.s;
-        changes.d = currentPlayerData.d;
+        changes.dr = currentPlayerData.dr;
         changes.h = currentPlayerData.h;
         changes.g = currentPlayerData.g;
         changes.e = currentPlayerData.e;
