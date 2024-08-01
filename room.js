@@ -268,14 +268,14 @@ function sendBatchedMessages(roomId) {
       const currentPlayerData = {
         x: player.x,
         y: player.y,
-        direction: player.direction,
-        health: player.health,
-        shooting: player.shooting,
-        gun: player.gun,
-        ping: player.ping,
-        hitdata: player.hitdata,
-        ell: player.elimlast,
-        bullets: formattedBullets, // Always include bullets
+        d: player.direction,
+        h: player.health,
+        s: player.shooting,
+        g: player.gun,
+        p: player.ping,
+        w: player.hitdata,
+        e: player.elimlast,
+        b: formattedBullets, // Always include bullets
       };
 
       // Include additional properties only when room state is not "playing"
@@ -358,6 +358,7 @@ function sendBatchedMessages(roomId) {
 
   batchedMessages.set(roomId, []); // Clear the batch after sending
 }
+
 
 
 
