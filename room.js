@@ -280,11 +280,11 @@ function sendBatchedMessages(roomId) {
 
       // Include additional properties only when room state is not "playing"
       if (room.state !== "playing") {
-        currentPlayerData.hat = player.hat;
-        currentPlayerData.top = player.top;
-        currentPlayerData.player_color = player.player_color;
-        currentPlayerData.hat_color = player.hat_color;
-        currentPlayerData.top_color = player.top_color;
+        currentPlayerData.1 = player.hat;
+        currentPlayerData.2 = player.top;
+        currentPlayerData.3 = player.player_color;
+        currentPlayerData.4 = player.hat_color;
+        currentPlayerData.5 = player.top_color;
       }
 
       playerData[player.playerId] = currentPlayerData;
@@ -304,12 +304,12 @@ function sendBatchedMessages(roomId) {
         });
 
         // Always include bullets changes
-        changes.bullets = currentPlayerData.bullets;
-        changes.shooting = currentPlayerData.shooting;
-        changes.direction = currentPlayerData.direction;
-        changes.health = currentPlayerData.health;
-        changes.gun = currentPlayerData.gun;
-        changes.ell = currentPlayerData.ell;
+        changes.b = currentPlayerData.b;
+        changes.s = currentPlayerData.s;
+        changes.d = currentPlayerData.d;
+        changes.h = currentPlayerData.h;
+        changes.g = currentPlayerData.g;
+        changes.e = currentPlayerData.e;
 
         if (Object.keys(changes).length > 0) {
           playerDataChanges[player.playerId] = changes;
@@ -320,13 +320,13 @@ function sendBatchedMessages(roomId) {
 
   // Create the new message based on room state
   const newMessage = {
-    playerData: room.state === "playing" ? playerDataChanges : playerData,
-    state: room.state,
+    pD: room.state === "playing" ? playerDataChanges : playerData,
+    st: room.state,
     ...(room.lastSent?.zone !== room.zone ? { z: room.zone } : {}),
     pl: room.maxplayers,
    // ...(room.lastSent?.sendping !== room.sendping ? { pg: room.sendping } : {}),
     rp: room.players.size,
-    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { eliminatedPlayers: room.eliminatedPlayers } : {}),
+    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { ep: room.eliminatedPlayers } : {}),
   };
 
   const jsonString = JSON.stringify(newMessage);
