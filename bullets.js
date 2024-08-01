@@ -106,7 +106,7 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset, damag
       startX: player.x + xOffset,
       startY: player.y + yOffsetAdjusted,
       direction: direction,
-      timestamp: player.bullets.size,
+      timestamp: player.bullets.length;
       damage: damage,
     };
 
