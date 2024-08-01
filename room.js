@@ -306,10 +306,10 @@ function sendBatchedMessages(roomId) {
         // Always include bullets changes
         changes.b = currentPlayerData.b;
         changes.s = currentPlayerData.s;
-        //changes.dr = currentPlayerData.dr;
-        //changes.h = currentPlayerData.h;
+        changes.dr = currentPlayerData.dr;
+        changes.h = currentPlayerData.h;
         changes.g = currentPlayerData.g;
-        //changes.e = currentPlayerData.e;
+        changes.e = currentPlayerData.e;
 
         if (Object.keys(changes).length > 0) {
           playerDataChanges[player.playerId] = changes;
