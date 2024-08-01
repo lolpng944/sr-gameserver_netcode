@@ -308,7 +308,7 @@ function sendBatchedMessages(roomId) {
         changes.s = currentPlayerData.s;
         //changes.dr = currentPlayerData.dr;
         //changes.h = currentPlayerData.h;
-        //changes.g = currentPlayerData.g;
+        changes.g = currentPlayerData.g;
         //changes.e = currentPlayerData.e;
 
         if (Object.keys(changes).length > 0) {
