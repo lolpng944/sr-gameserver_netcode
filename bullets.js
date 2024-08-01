@@ -90,13 +90,18 @@ function shootBulletsWithDelay(room, player, direction, speed, length, delay, yO
   });
 }
 
+
+ 
+
+
 function shootBullet(room, player, direction, speed, maxDistance, yOffset, damage) {
   return new Promise(async (resolve) => {
 
     const radians = (direction * Math.PI) / 180;
     const xOffset = yOffset * Math.cos(radians);
     const yOffsetAdjusted = yOffset * Math.sin(radians);
-    const randomPart = Math.random().toString(36).substring(2, 15);
+    const length = 5,
+    const randomPart = Math.random().toString(36).substring(2, 2 + length);
 
    
 
@@ -106,7 +111,7 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset, damag
       startX: player.x + xOffset,
       startY: player.y + yOffsetAdjusted,
       direction: direction,
-      timestamp: player.bullets.length;
+      timestamp: randomPart,
       damage: damage,
     };
 
