@@ -213,24 +213,18 @@ wss.on("connection", (ws, req) => {
   const gamemode = (urlParts[2]);
    // const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-    console.log(gamemode)
 
     const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
 
-    if (!isValidOrigin(origin)) {
+    if (req.length > 2000 || origin.length > 50 || !isValidOrigin(origin)) {
       ws.close(4004, "Unauthorized");
       return;
     }
 
     console.log(gamemode, token)
-
-   if (!isvalidmode(gamemode)) {
-    ws.close(4005, "Unauthorized");
-    return;
-    }
      
 
-    if (!token) {
+    if (!token || token.length > 300 || !isvalidmode(gamemode)) {
       ws.close(4004, "Unauthorized");
       return;
     }
