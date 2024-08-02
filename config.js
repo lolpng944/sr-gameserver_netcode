@@ -112,7 +112,7 @@ const gunsconfig = {
     ]
   },
   2: {
-    cooldown: 500,
+    cooldown: 800,
     damage: 2,
     useplayerangle: true,
     bullets: [
