@@ -53,11 +53,11 @@ function isCollisionWithBullet(walls, x, y) {
   const nearbyWalls = walls.filter((wall) => {
     // Calculate the distance between the point (x, y) and the closest point on the wall's perimeter
     const closestX = Math.max(
-      wall.x - wallblocksize,
+      wall.x - wallblocksize + 1,
       Math.min(x, wall.x + wallblocksize),
     );
     const closestY = Math.max(
-      wall.y - wallblocksize,
+      wall.y - wallblocksize + 1,
       Math.min(y, wall.y + wallblocksize),
     );
     const distanceX = x - closestX;

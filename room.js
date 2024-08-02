@@ -1,5 +1,5 @@
 const { LZString, axios, Limiter } = require('./index.js');
-const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORLD_HEIGHT, game_start_time, max_room_players, spawnPositions, batchedMessages, rooms, walls, gunsconfig } = require('./config.js');
+const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORLD_HEIGHT, game_start_time, batchedMessages, rooms, mapsconfig, gunsconfig } = require('./config.js');
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { connectedUsernames } = require('./index.js');
@@ -83,6 +83,7 @@ async function joinRoom(ws, token, gamemode) {
 
       // Determine spawn position index
       const playerCount = room.players.size;
+      const spawnPositions = room.spawns
       const spawnIndex = playerCount % spawnPositions.length;
 
       room.players.set(playerId, {
@@ -326,6 +327,7 @@ function sendBatchedMessages(roomId) {
     pl: room.maxplayers,
    // ...(room.lastSent?.sendping !== room.sendping ? { pg: room.sendping } : {}),
     rp: room.players.size,
+    id: room.map,
     ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { ep: room.eliminatedPlayers } : {}),
   };
 
@@ -361,7 +363,11 @@ function sendBatchedMessages(roomId) {
 
 
 
-
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 
 // Utility function to calculate distance between two points
@@ -371,8 +377,8 @@ function getDistance(x1, y1, x2, y2) {
 
 
 
-
 function createRoom(roomId, height, width, gamemode, maxplayers) {
+  const mapid = (getRandomInt(1, Object.keys(mapsconfig).length))
   const room = {
     roomId: roomId,
     maxplayers: maxplayers,
@@ -388,7 +394,9 @@ function createRoom(roomId, height, width, gamemode, maxplayers) {
     zoneEndY: height,
     mapHeight: height,
     mapWidth: width,
-    walls: walls,
+    walls: mapsconfig[mapid].walls.map(({ x, y }) => ({ x, y })),
+    spawns: mapsconfig[mapid].spawns,
+    map: mapid,
   };
 
   rooms.set(roomId, room);
