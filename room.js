@@ -269,7 +269,7 @@ function sendBatchedMessages(roomId) {
       const currentPlayerData = {
         x: player.x,
         y: player.y,
-        dr: player.direction,
+        dr: player.direction2,
         h: player.health,
         s: player.shooting,
         g: player.gun,
@@ -560,6 +560,14 @@ if (data.type === "spectate") {
           if (player) {
             // Update the player direction based on input
             player.direction = validDirection;
+
+              if (validDirection > 90) {
+        player.direction2 = 90;
+      } else if (validDirection < -90) {
+        player.direction2 = -90;
+      } else {
+        player.direction2 = validDirection;
+      }
 
             // Check if the player should move
             if (data.moving === "true") {
