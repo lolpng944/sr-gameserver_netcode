@@ -3,9 +3,9 @@ const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORL
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { connectedUsernames } = require('./index.js');
-const { startDecreasingHealth, startRegeneratingHealth } = require('./match-modifiers');
+const { startRegeneratingHealth } = require('./match-modifiers');
 const { verifyPlayer } = require('./dbrequests');
-const { UseZone, printZone } = require('./zone');
+const { UseZone } = require('./zone');
 
 function closeRoom(roomId) {
   const room = rooms.get(roomId);
@@ -35,7 +35,6 @@ function closeRoom(roomId) {
 
 async function joinRoom(ws, token, gamemode) {
   try {
-    const expectedOrigin = "tw-editor://.";
     
 
     const playerVerified = await verifyPlayer(token);
@@ -115,7 +114,8 @@ async function joinRoom(ws, token, gamemode) {
         shoot_direction: 90,
         gun: 1,
         bullets: [],
-        spectatingPlayer: playerId
+        spectatingPlayer: playerId,
+        emote: 0,
       });
 
       // Handle room state transitions and game start
@@ -305,12 +305,8 @@ function sendBatchedMessages(roomId) {
         });
 
         // Always include bullets changes
-        changes.b = currentPlayerData.b;
-        changes.s = currentPlayerData.s;
-        changes.dr = currentPlayerData.dr;
-        changes.h = currentPlayerData.h;
-        changes.g = currentPlayerData.g;
-        changes.e = currentPlayerData.e;
+      
+          changes.b = currentPlayerData.b;
 
         if (Object.keys(changes).length > 0) {
           playerDataChanges[player.playerId] = changes;
@@ -322,14 +318,16 @@ function sendBatchedMessages(roomId) {
   // Create the new message based on room state
   const newMessage = {
     pD: room.state === "playing" ? playerDataChanges : playerData,
-    st: room.state,
+    st: room.lastSent?.state !== room.state ? room.state : undefined,
     ...(room.lastSent?.zone !== room.zone ? { z: room.zone } : {}),
-    pl: room.maxplayers,
-   // ...(room.lastSent?.sendping !== room.sendping ? { pg: room.sendping } : {}),
+    pl: room.state === "playing" ? room.lastSent?.maxplayers !== room.maxplayers ? { pl: room.maxplayers } : undefined : room.maxplayers,
+    // ...(room.lastSent?.sendping !== room.sendping ? { pg: room.sendping } : {}),
     rp: room.players.size,
-    id: room.map,
-    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { ep: room.eliminatedPlayers } : {}),
+    id: room.state === "playing" ? undefined : room.map,
+    ep: room.lastSent?.ep !== room.eliminatedPlayers || (room.eliminatedPlayers && room.eliminatedPlayers.length > 0) ? { ep: room.eliminatedPlayers } : undefined,
   };
+
+  //pl: room.state === "playing" ? room.lastSent?.maxplayers !== room.maxplayers ? { pl: room.maxplayers } : {} : room.maxplayers,
 
   const jsonString = JSON.stringify(newMessage);
   const compressedString = LZString.compressToUint8Array(jsonString);
@@ -352,8 +350,10 @@ function sendBatchedMessages(roomId) {
       zone: room.zone,
       maxplayers: room.maxplayers,
      // sendping: room.sendping,
-      playersSize: room.players.size,
+      playersize: room.players.size,
       state: room.state,
+      id: room.map,
+      ep: room.eliminatedPlayers
     };
   }
 
@@ -410,19 +410,16 @@ console.log("room created:", roomId)
 
   room.intervalId = intervalId;
 
-  // Close the room after 10 minutes of being open
   const roomopentoolong = setTimeout(() => {
     closeRoom(roomId);
     console.log(`Room ${roomId} closed due to timeout.`);
-  }, 10 * 60 * 1000); // 10 minutes in milliseconds
-
+  }, 10 * 60 * 1000);
   room.runtimeout = roomopentoolong;
 
   return room;
 }
 
 function generateRandomCoins(roomId) {
-  const room = rooms.get(roomId);
   const coins = [];
   for (let i = 0; i < 1; i++) {
     const coin = {
@@ -439,12 +436,9 @@ function generateRandomCoins(roomId) {
 function handleCoinCollected2(result, index) {
   const room = rooms.get(result.roomId);
   const playerId = result.playerId;
-  const player = room.players.get(playerId);
 
-  // Remove the collected coin
   room.coins.splice(index, 1);
 
-  // Increase player's coins on the server (example post request)
   const expectedOrigin = "tw-editor://.";
   axios
     .post(
@@ -476,137 +470,117 @@ const isValidDirection = (direction) => {
 };
 
 function handleRequest(result, message) {
-  const player = result.room.players.get(result.playerId);
-  if (result.room.state === "playing" && player.visible !== false) {
-    try {
-      const data = JSON.parse(message);
+	const player = result.room.players.get(result.playerId);
+	if (result.room.state === "playing" && player.visible !== false) {
+		try {
+			const data = JSON.parse(message);
+			if (message.length > 100) {
+				player.ws.close(4000, "ahhh whyyyyy");
+				result.room.players.delete(result.playerId);
+			}
+			if (data.type === "shoot") {
+				if (data.shoot_direction > -181 && data.shoot_direction < 181) {
+					player.shoot_direction = parseFloat(data.shoot_direction);
+					handleBulletFired(result.room, player, player.gun);
+				} else {
+					console.log(data.shoot_direction)
+				}
+			}
+			if (data.type === "pong") {
+				const timestamp = new Date().getTime();
+				if (player.lastping && (timestamp - player.lastping < 2000)) {
+					player.ping = timestamp - player.lastping;
+				} else {
+	
+				}
+			}
+			if (data.type === "switch_gun") {
+				const selectedGunNumber = parseFloat(data.gun);
+				const allguns = Object.keys(gunsconfig).length;
+				if (
+					selectedGunNumber !== player.gun &&
+					!player.shooting &&
+					selectedGunNumber >= 1 &&
+					selectedGunNumber <= allguns
+				) {
+					
+					player.gun = selectedGunNumber;
+				} else if (player.shooting) {
+					
+					console.log("Cannot switch guns while shooting.");
+				} else {
+					
+					console.log("Gun number must be between 1 and 3.");
+				}
+			}
+			if (data.moving === "false") {
+				clearInterval(player.moveInterval);
+				player.moveInterval = null;
+				player.moving = false;
+			}
 
-      if (message.length > 300) {
-        player.ws.close(4000, "ahhh whyyyyy");
-        result.room.players.delete(result.playerId);
-      }
 
-      if (data.type === "shoot") {
+      if (data.type === "emote" && data.id >= 1 && data.id <= 3 && player.emote === 0){
+         
+        player.emote = data.id
 
-        if (data.shoot_direction > -181 && data.shoot_direction < 181 ) {
-        player.shoot_direction = parseFloat(data.shoot_direction);
-        handleBulletFired(result.room, player, player.gun);
+        setTimeout(() =>{
+        player.emote = 0
 
-
-      } else {
-console.log(data.shoot_direction)
-      }
-    }
-
-
-    if (data.type === "pong") {
-
-      const timestamp = new Date().getTime();
-
-      if (player.lastping && (timestamp - player.lastping < 2000)) {
-        player.ping = timestamp - player.lastping;
-    } else {
-
-        // Optionally, you could set player.ping to a default value or perform other actions
-    }
-}
-
-
-      
-if (data.type === "spectate") {
-  const timestamp = new Date().getTime();
-
-  if (!player.visible && result.room.players.has(data.name)) {
-    player.spectatingPlayer = data.name;
-    console.log("true");
-  }
-}
-
-
-      if (data.type === "switch_gun") {
-  const selectedGunNumber = parseFloat(data.gun);
-  const allguns = Object.keys(gunsconfig).length;
-  if (
-    selectedGunNumber !== player.gun &&
-    !player.shooting && // Check if the player is not shooting
-    selectedGunNumber >= 1 &&
-    selectedGunNumber <= allguns
-  ) {
-    // Check if the gun number is between 1 and 3
-    player.gun = selectedGunNumber;
-  } else if (player.shooting) {
-    // Notify the user that they cannot switch guns while shooting
-    console.log("Cannot switch guns while shooting.");
-  } else {
-    // Notify the user that the gun number must be between 1 and 3
-    console.log("Gun number must be between 1 and 3.");
-  }
-}
-
-      if (data.moving === "false") {
-        clearInterval(player.moveInterval);
-        player.moveInterval = null;
-        player.moving = false;
-      }
-
-      if (
-        data.type === "movement" &&
-        typeof data.direction === "string" &&
-        isValidDirection(data.direction)
-      ) {
-        const validDirection = parseFloat(data.direction);
-
-        if (!isNaN(validDirection)) {
-          if (player) {
-            // Update the player direction based on input
-            player.direction = validDirection;
-
-              if (validDirection > 90) {
-        player.direction2 = 90;
-      } else if (validDirection < -90) {
-        player.direction2 = -90;
-      } else {
-        player.direction2 = validDirection;
-      }
-
-            // Check if the player should move
-            if (data.moving === "true") {
-              // Set the shouldMove flag to true
-               if (!player.moving === true) {
-              player.moving = true;
-                 }
-            } else if (data.moving === "false") {
-              // If not moving, set the shouldMove flag to false
-              player.moving = false;
-            } else {
-              console.warn("Invalid 'moving' value:", data.moving);
-            }
-
-            // Clear the existing interval
-
-            // Set up a new interval to move the player every 50 milliseconds
-            if (!player.moveInterval) {
-
-              player.moveInterval = setInterval(() => {
-                // Check the shouldMove flag before moving
-                if (player.moving) {
-                  handleMovement(result, player);
-                } else {
-                  // If shouldMove is false, clear the interval
-                  clearInterval(player.moveInterval);
-                  player.moveInterval = null;
-                }
-              }, server_tick_rate);
-            }
-          }
-        } else {
-          console.warn("Invalid direction value:", data.direction);
+        }, 3000);
         }
-      }
-    } catch (error) {
-      console.error("Error parsing message:", error);
-    }
-  }
+
+			if (
+				data.type === "movement" &&
+				typeof data.direction === "string" &&
+				isValidDirection(data.direction)
+			) {
+				const validDirection = parseFloat(data.direction);
+				if (!isNaN(validDirection)) {
+					if (player) {
+						
+						player.direction = validDirection;
+						if (validDirection > 90) {
+							player.direction2 = 90;
+						} else if (validDirection < -90) {
+							player.direction2 = -90;
+						} else {
+							player.direction2 = validDirection;
+						}
+						
+						if (data.moving === "true") {
+						
+							if (!player.moving === true) {
+								player.moving = true;
+							}
+						} else if (data.moving === "false") {
+							
+							player.moving = false;
+						} else {
+							console.warn("Invalid 'moving' value:", data.moving);
+						}
+					
+						if (!player.moveInterval) {
+							player.moveInterval = setInterval(() => {
+
+								if (player.moving) {
+									handleMovement(result, player);
+								} else {
+		
+									clearInterval(player.moveInterval);
+									player.moveInterval = null;
+								}
+							}, server_tick_rate);
+						}
+					}
+				} else {
+					console.warn("Invalid direction value:", data.direction);
+				}
+			}
+		} catch (error) {
+			console.error("Error parsing message:", error);
+		}
+	}
 }
 
 module.exports = {
