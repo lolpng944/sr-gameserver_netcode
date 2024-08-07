@@ -54,7 +54,7 @@ const teleporters = [
 
 const maxmodeplayers = {
   1: 1, 
-  2: 2, 
+  2: 3, 
 };
 
 const all_gamemodes = [
