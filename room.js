@@ -521,7 +521,7 @@ function handleRequest(result, message) {
 			}
 
 
-      if (data.type === "emote" && data.id >= 1 && data.id <= 3 && player.emote === 0){
+      if (data.type === "emote" && data.id >= 1 && data.id <= 4 && player.emote === 0){
          
         player.emote = data.id
 
