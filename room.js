@@ -325,7 +325,7 @@ function sendBatchedMessages(roomId) {
     // ...(room.lastSent?.sendping !== room.sendping ? { pg: room.sendping } : {}),
     rp: room.players.size,
     id: room.state === "playing" ? undefined : room.map,
-    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 ? { ep: room.eliminatedPlayers } : {}),
+    ...(room.eliminatedPlayers && room.eliminatedPlayers.length > 0 && room.lastSent?.ep !== room.eliminatedPlayers ? { ep: room.eliminatedPlayers } : {}),
   };
 
   //pl: room.state === "playing" ? room.lastSent?.maxplayers !== room.maxplayers ? { pl: room.maxplayers } : {} : room.maxplayers,
