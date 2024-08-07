@@ -119,10 +119,6 @@ function handlePlayerCollision(room, shootingPlayer, nearestObject, shootdamager
   };
   shootingPlayer.hitdata = JSON.stringify(hitdata);
 
-  setTimeout(() => {
-    shootingPlayer.hitdata = null;
-  }, 40);
-
   // Check if the player is eliminated
   if (nearestObject.health <= 0) {
     // Player is eliminated
