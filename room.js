@@ -277,6 +277,7 @@ function sendBatchedMessages(roomId) {
         w: player.hitdata,
         e: player.elimlast,
         b: formattedBullets, // Always include bullets
+        em: player.emote,
       };
 
       // Include additional properties only when room state is not "playing"
