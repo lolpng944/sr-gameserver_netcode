@@ -156,7 +156,7 @@ async function handleBulletFired(room, player, gunType) {
    gun.bullets.forEach(bullet => {
     
         const finalAngle = gun.useplayerangle === true ? bullet.angle + definedAngle : bullet.angle;
-        shootBulletsWithDelay(room, player, finalAngle, bullet.speed / 2, bullet.distance, bullet.delay, bullet.offset, gun.damage);
+        shootBulletsWithDelay(room, player, finalAngle, bullet.speed / 1.9, bullet.distance, bullet.delay, bullet.offset, gun.damage);
     });
 
    
