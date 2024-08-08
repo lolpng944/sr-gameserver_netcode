@@ -120,7 +120,7 @@ function handlePlayerCollision(room, shootingPlayer, nearestObject, shootdamager
   shootingPlayer.hitdata = JSON.stringify(hitdata);
 
   // Check if the player is eliminated
-  if (nearestObject.health <= 0 && room.respawn === 0) {
+  if (nearestObject.health <= 0 && 1 > player.respawns) {
     // Player is eliminated
     nearestObject.visible = false;
 
@@ -193,7 +193,7 @@ function handlePlayerCollision(room, shootingPlayer, nearestObject, shootdamager
   } else {
 
 
-    if (nearestObject.health <= 0 && room.respawn === 1) {
+    if (nearestObject.health <= 0 && player.respawns > 0) {
       // Player is eliminated
       shootingPlayer.elimlast = nearestObject.playerId;
 
@@ -212,6 +212,8 @@ function handlePlayerCollision(room, shootingPlayer, nearestObject, shootdamager
 function respawnplayer(room, player) {
 
 
+
+  player.respawns--
   player.moving = false;
 	clearInterval(player.moveInterval);
 	player.moveInterval = null;

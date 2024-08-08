@@ -117,6 +117,7 @@ async function joinRoom(ws, token, gamemode) {
         bullets: [],
         spectatingPlayer: playerId,
         emote: 0,
+        respawns: room.respawns,
       });
 
       // Handle room state transitions and game start
@@ -400,7 +401,7 @@ function createRoom(roomId, height, width, gamemode, gmconfig) {
     walls: mapsconfig[mapid].walls.map(({ x, y }) => ({ x, y })),
     spawns: mapsconfig[mapid].spawns,
     map: mapid,
-    respawn: gmconfig.respawn,
+    respawns: gmconfig.respawns_allowed,
   };
 
   rooms.set(roomId, room);

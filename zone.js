@@ -31,7 +31,7 @@ function isWithinZone(room, playerX, playerY) {
     return playerX - 40 >= room.zoneStartX && playerX + 40 <= room.zoneEndX &&
            playerY - 60  >= room.zoneStartY && playerY + 60 <= room.zoneEndY;
 }
-shrinkspeed = 1.4 / 1000
+shrinkspeed = 41.4 / 1000
 // Function to shrink the game zone
 function shrinkZone(room) {
    dealDamage(room);
@@ -72,7 +72,7 @@ function dealDamage(room) {
             if (1 > player.health) {
 
               console.log(room.respawn, "fdff")
-                if (room.respawn === 0) {
+                if (1 > player.respawns) {
 
                  
 

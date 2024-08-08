@@ -7,7 +7,7 @@ const matchmaking_timeout = 300000;
 const player_idle_timeout = 60000;
 const WORLD_WIDTH = 800;
 const WORLD_HEIGHT = 800;
-const playerspeed = 0.20;
+const playerspeed = 0.40;
 const SHOOT_COOLDOWN = 100; 
 const BULLET_DAMAGE = 5;
 const game_start_time = 5000;
@@ -33,11 +33,11 @@ const teleporters = [
 const gamemodeconfig = {
   1: {
     maxplayers: 1,
-    respawn: 1,
+    respawns_allowed: 0,
   },
   2: {
     maxplayers: 2,
-    respawn: 1,
+    respawns_allowed: 1,
  
   },
 };
