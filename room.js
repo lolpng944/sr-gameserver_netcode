@@ -1,5 +1,5 @@
 const { LZString, axios, Limiter } = require('./index.js');
-const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORLD_HEIGHT, game_start_time, batchedMessages, rooms, mapsconfig, gunsconfig } = require('./config.js');
+const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORLD_HEIGHT, game_start_time, batchedMessages, rooms, mapsconfig, gunsconfig, gamemodeconfig } = require('./config.js');
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { connectedUsernames } = require('./index.js');
@@ -55,7 +55,7 @@ async function joinRoom(ws, token, gamemode) {
       // Check if there's an existing room with available slots
       const availableRoom = Array.from(rooms.values()).find(
         (currentRoom) =>
-          currentRoom.players.size < maxmodeplayers[gamemode] &&
+          currentRoom.players.size < gamemodeconfig[gamemode].maxplayers &&
           currentRoom.state !== "playing" &&
           currentRoom.state !== "countdown" &&
           currentRoom.gamemode === gamemode
@@ -66,7 +66,7 @@ async function joinRoom(ws, token, gamemode) {
         room = availableRoom;
       } else {
         roomId = `room_${rooms.size + 1}`;
-        room = createRoom(roomId, WORLD_HEIGHT, WORLD_WIDTH, gamemode, maxmodeplayers[gamemode]);
+        room = createRoom(roomId, WORLD_HEIGHT, WORLD_WIDTH, gamemode, gamemodeconfig[gamemode]);
       }
 
       function createRateLimiter() {
@@ -93,7 +93,7 @@ async function joinRoom(ws, token, gamemode) {
         prevX: 0,
         prevY: 0,
         lastProcessedPosition: { x: spawnPositions[spawnIndex].x, y: spawnPositions[spawnIndex].y },
-        bullet2: { x: spawnPositions[spawnIndex].x, y: spawnPositions[spawnIndex].y },
+        startspawn: { x: spawnPositions[spawnIndex].x, y: spawnPositions[spawnIndex].y },
         playerId: playerId,
         rateLimiter: playerRateLimiter,
         hat: hat,
@@ -103,6 +103,7 @@ async function joinRoom(ws, token, gamemode) {
         top_color: top_color,
         timeout: null, // Add timeout property to player
         health: 100,
+        starthealth: 100,
         damage: 0,
         kills: 0,
         lastShootTime: 0,
@@ -278,6 +279,7 @@ function sendBatchedMessages(roomId) {
         e: player.elimlast,
         b: formattedBullets, // Always include bullets
         em: player.emote,
+        ell: player.elimlast,
       };
 
       // Include additional properties only when room state is not "playing"
@@ -378,11 +380,11 @@ function getDistance(x1, y1, x2, y2) {
 
 
 
-function createRoom(roomId, height, width, gamemode, maxplayers) {
+function createRoom(roomId, height, width, gamemode, gmconfig) {
   const mapid = (getRandomInt(1, Object.keys(mapsconfig).length))
   const room = {
     roomId: roomId,
-    maxplayers: maxplayers,
+    maxplayers: gmconfig.maxplayers,
     snap: [],
     players: new Map(),
     state: "waiting", // Possible values: "waiting", "playing", "countdown"
@@ -398,6 +400,7 @@ function createRoom(roomId, height, width, gamemode, maxplayers) {
     walls: mapsconfig[mapid].walls.map(({ x, y }) => ({ x, y })),
     spawns: mapsconfig[mapid].spawns,
     map: mapid,
+    respawn: gmconfig.respawn,
   };
 
   rooms.set(roomId, room);
@@ -495,6 +498,7 @@ function handleRequest(result, message) {
 	
 				}
 			}
+
 			if (data.type === "switch_gun") {
 				const selectedGunNumber = parseFloat(data.gun);
 				const allguns = Object.keys(gunsconfig).length;
@@ -567,7 +571,7 @@ function handleRequest(result, message) {
 								if (player.moving) {
 									handleMovement(result, player);
 								} else {
-		
+               
 									clearInterval(player.moveInterval);
 									player.moveInterval = null;
 								}

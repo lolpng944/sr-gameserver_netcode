@@ -28,7 +28,7 @@ function getDistance(x1, y1, x2, y2) {
 function handleMovement(result, player) {
 
   //const { handleCoinCollected2 } = require('./room')
-  const deltaTime = player.lastProcessedPosition !== undefined ? 20 : 0; // Adjust delta time calculation as needed
+  const deltaTime = 20
 
   const finalDirection = player.moving ? player.direction - 90 : player.direction;
 
@@ -120,7 +120,7 @@ function handlePlayerCollision(room, shootingPlayer, nearestObject, shootdamager
   shootingPlayer.hitdata = JSON.stringify(hitdata);
 
   // Check if the player is eliminated
-  if (nearestObject.health <= 0) {
+  if (nearestObject.health <= 0 && room.respawn === 0) {
     // Player is eliminated
     nearestObject.visible = false;
 
@@ -163,7 +163,7 @@ function handlePlayerCollision(room, shootingPlayer, nearestObject, shootdamager
 
     setTimeout(() => {
       shootingPlayer.elimlast = null;
-    }, 1000);
+    }, 100);
 
     // Check for game end conditions
     if (
@@ -190,10 +190,48 @@ function handlePlayerCollision(room, shootingPlayer, nearestObject, shootdamager
         endGame(room);
       }, game_win_rest_time);
     }
+  } else {
+
+
+    if (nearestObject.health <= 0 && room.respawn === 1) {
+      // Player is eliminated
+      shootingPlayer.elimlast = nearestObject.playerId;
+
+      setTimeout(() => {
+        shootingPlayer.elimlast = null;
+      }, 100);
+
+      nearestObject.visible = false;
+      respawnplayer(room, nearestObject)
+    }
+  }
 }
-}
+
+
+
+function respawnplayer(room, player) {
+
+
+  player.moving = false;
+	clearInterval(player.moveInterval);
+	player.moveInterval = null;
+
+  player.health = player.starthealth
+  player.visible = false
+  player.x = player.startspawn.x
+  player.y = player.startspawn.y
+  setTimeout(() =>{
+    player.visible = true
+
+    }, 5000);
+
+ }
+ 
+ 
+
 
 module.exports = {
   handleMovement,
   handlePlayerCollision,
+  respawnplayer,
 }

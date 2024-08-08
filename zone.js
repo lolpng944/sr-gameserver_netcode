@@ -1,7 +1,8 @@
 const { WORLD_HEIGHT, WORLD_WIDTH, game_win_rest_time, server_tick_rate } = require('./config');
 
 const { increasePlayerPlace, increasePlayerWins } = require('./dbrequests')
-const { endGame } = require('./game')
+const { endGame, respawnPlayer } = require('./game')
+const { respawnplayer } = require('./player')
 
 // Function to check if player is within the zone
 //function isWithinZone(room, playerX, playerY) {
@@ -69,11 +70,20 @@ function dealDamage(room) {
             player.health -= 5;
             player.last_hit_time = new Date().getTime();
             if (1 > player.health) {
-              handleElimination(room, player);
-            
-          
+
+              console.log(room.respawn, "fdff")
+                if (room.respawn === 0) {
+
+                 
+
+                  handleElimination(room, player);
+                } else {
+                  
+
+                    respawnplayer(room, player);
+                  } 
             }
-          }
+            }
       }
   });
 }

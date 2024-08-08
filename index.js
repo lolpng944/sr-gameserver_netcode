@@ -11,7 +11,7 @@ const LZString = require("lz-string");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
 
 const ConnectionOptionsRateLimit = {
-  points: 1, // Number of points
+  points: 10, // Number of points
   duration: 5, // Per second
 };
 
@@ -129,7 +129,7 @@ const {
   increasePlayerWins,
 } = require("./dbrequests");
 
-const { game_win_rest_time, maxClients, all_gamemodes } = require("./config");
+const { game_win_rest_time, maxClients, all_gamemodes, gamemodeconfig } = require("./config");
 const { strict } = require("assert");
 
 const limiter = rateLimit({
@@ -224,8 +224,9 @@ wss.on("connection", (ws, req) => {
     console.log(gamemode, token)
      
 
-    if (!token || token.length > 300 || !isvalidmode(gamemode)) {
+    if (!(token && token.length < 300 && gamemode in gamemodeconfig)) {
       ws.close(4004, "Unauthorized");
+      console.log("not correct")
       return;
     }
 
@@ -376,7 +377,7 @@ module.exports = {
 };
 
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8090;
 
 server.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);

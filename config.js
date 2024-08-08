@@ -7,7 +7,7 @@ const matchmaking_timeout = 300000;
 const player_idle_timeout = 60000;
 const WORLD_WIDTH = 800;
 const WORLD_HEIGHT = 800;
-const playerspeed = 0.20;
+const playerspeed = 0.40;
 const SHOOT_COOLDOWN = 100; 
 const BULLET_DAMAGE = 5;
 const game_start_time = 5000;
@@ -25,60 +25,27 @@ const numericDirection = parseFloat(direction);
 return !isNaN(numericDirection) && validDirections.includes(numericDirection);
   };
 
-
-
-//console.log(normalArray);
-
-const wall1s = [
-  { x: 150, y: 50 },
-   { x: 150, y: 50 },
-   { x: -150, y: 50 },
-   { x: -150, y: 50 },
-  { x: 150, y: 0 },
-{ x: -150, y: 0 },
-{ x: 0, y: 250 },
-  { x: 50, y: 250 },
-   { x: -50, y: 250 },
-];
-
-
-
-// Print the JSON representation
-//console.log(wallsJSON);
-
-
 const teleporters = [
   { x: 700, y: 0, width: 50, height: 50, destination: { x: -700, y: 0 } },// Example teleporter
   // Add more teleporters as needed
 ];
 
-const maxmodeplayers = {
-  1: 1, 
-  2: 3, 
+const gamemodeconfig = {
+  1: {
+    maxplayers: 1,
+    respawn: 1,
+  },
+  2: {
+    maxplayers: 2,
+    respawn: 1,
+ 
+  },
 };
 
 const all_gamemodes = [
   "1",
   "2"
 ];
-
-
-const weaponShootRange = {
-  1: 200, 
-  2: 1000, 
-};
-
-const weaponCooldowns = {
-  1: 400, 
-  2: 1500,
-};
-
-const guns_damage = {
-  1: 1,
-  2: 10,
-};
-
-
 
 const gunsconfig = {
   1: {
@@ -176,15 +143,12 @@ module.exports = {
   game_win_rest_time,
   //max_room_players,
   maxClients,
-  weaponShootRange,
-  weaponCooldowns,
-  guns_damage,
   isValidDirection,
   teleporters,
   playerHitboxWidth, 
   playerHitboxHeight,
-  maxmodeplayers,
   all_gamemodes,
   gunsconfig,
   mapsconfig,
+  gamemodeconfig,
 };
