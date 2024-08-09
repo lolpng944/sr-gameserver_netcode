@@ -9,6 +9,22 @@ const { sanitize } = require("validator");
 const rateLimit = require("express-rate-limit");
 const LZString = require("lz-string");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
+const osu = require('node-os-utils');
+const cpu = osu.cpu;
+const mem = osu.mem;
+
+// Function to log the server's RAM and CPU usage
+async function logServerUsage() {
+  const cpuUsage = await cpu.usage();
+  const memoryInfo = await mem.info();
+
+  console.log('CPU Usage:', cpuUsage + '%');
+  console.log('Memory Usage:', memoryInfo.usedMemMb + ' MB used of ' + memoryInfo.totalMemMb + ' MB');
+  console.log('Memory Usage:', memoryInfo.usedMemPercentage + '%');
+}
+
+// Log server usage every 5 seconds
+setInterval(logServerUsage, 5000);
 
 const ConnectionOptionsRateLimit = {
   points: 1, // Number of points
