@@ -1,52 +1,72 @@
-function decreaseHealth(player) {
-  // Assuming there is a player object with a health property
-  if (player.health > 0) {
-    player.health -= 1;
+const { respawnplayer } = require('./player')
+const { handleElimination } = require('./zone')
+
+
+// Helper function to apply the health decrease
+function applyHealthDecrease(player, room) {
+  player.last_hit_time = new Date().getTime();
+  player.health -= 5;
+
+  if (player.health <= 0) {
+    if (player.respawns > 0) {
+      respawnplayer(room, player);
+    } else {
+      handleElimination(room, player);
+    }
   }
 }
 
-function decreaseHealthForAllPlayers(room) {
+// Async function to decrease health
+async function decreaseHealth(player, room) {
+  if (player.health > 1 && player.visible) {
+    applyHealthDecrease(player, room);
+  }
+}
+
+// Apply health decrease for all players
+async function decreaseHealthForAllPlayers(room) {
   if (room.state === "playing") {
-    room.players.forEach((player) => {
-      decreaseHealth(player);
+    room.players.forEach(async (player) => {
+      await decreaseHealth(player, room);
     });
   }
 }
 
-// Example: Call this function periodically, e.g., using setInterval
+// Start decreasing health at intervals
 function startDecreasingHealth(room, intervalInSeconds) {
-  setInterval(() => {
+  room.decreasehealth = setInterval(() => {
+
     decreaseHealthForAllPlayers(room);
-  }, intervalInSeconds * 1000); // Convert seconds to milliseconds
+    console.log("fixer")
+  }, intervalInSeconds * 1000);
 }
+
 
 function waitForHealthBelow100(player) {
   return new Promise((resolve) => {
     const checkHealth = () => {
       if (player.health < 100) {
-        resolve(); // Resolve the promise when health is below 100
+        resolve(); 
       } else {
-        setTimeout(checkHealth, 100); // Check again after a short delay
+        setTimeout(checkHealth, 100);
       }
     };
-    checkHealth(); // Start checking player's health
+    checkHealth(); 
   });
 }
 
-// Function to regenerate player's health
 async function regenerateHealth(player) {
-  await waitForHealthBelow100(player); // Wait until health is below 100
+  await waitForHealthBelow100(player); 
   const currentTime = new Date().getTime();
   const timeSinceLastHit = currentTime - player.last_hit_time;
   if (timeSinceLastHit >= 10000 && player.health < 100) {
-    player.health += 6; // Adjust the regeneration rate as needed
+    player.health += 6;
     if (player.health > 100) {
-      player.health = 100; // Ensure health doesn't exceed 100
+      player.health = 100; 
     }
   }
 }
 
-// Function to regenerate health for all players in the room
 async function regenerateHealthForAllPlayers(room) {
   if (room.state === "playing") {
     room.players.forEach((player) => {
@@ -57,11 +77,11 @@ async function regenerateHealthForAllPlayers(room) {
   }
 }
 
-// Example: Call this function periodically to regenerate health
 function startRegeneratingHealth(room, intervalInSeconds) {
-  setInterval(() => {
+  room.regeneratehealth = setInterval(() => {
+    console.log("fixer2")
     regenerateHealthForAllPlayers(room);
-  }, intervalInSeconds * 1000); // Convert seconds to milliseconds
+  }, intervalInSeconds * 1000); 
 }
 
 module.exports = {

@@ -3,7 +3,7 @@ const { matchmaking_timeout, maxmodeplayers, server_tick_rate, WORLD_WIDTH, WORL
 const { handleBulletFired } = require('./bullets.js');
 const { handleMovement } = require('./player.js');
 const { connectedUsernames } = require('./index.js');
-const { startRegeneratingHealth } = require('./match-modifiers');
+const { startRegeneratingHealth, startDecreasingHealth } = require('./match-modifiers');
 const { verifyPlayer } = require('./dbrequests');
 const { UseZone } = require('./zone');
 
@@ -17,6 +17,8 @@ function closeRoom(roomId) {
     clearTimeout(room.runtimeout);
     clearInterval(room.snapInterval);
     clearInterval(room.cleanupinterval);
+    clearInterval(room.decreasehealth);
+    clearInterval(room.regeneratehealth);
 
     // Clean up resources associated with players in the room
     room.players.forEach(player => {
@@ -138,6 +140,11 @@ async function joinRoom(ws, token, gamemode) {
          if (room.regenallowed === true) {
             startRegeneratingHealth(room, 1);
             }
+
+         if (room.healthdecrease === true) {
+            startDecreasingHealth(room, 1)
+            }
+           
           
          // generateRandomCoins(room);
         }, game_start_time);
@@ -412,7 +419,8 @@ function createRoom(roomId, height, width, gamemode, gmconfig) {
     respawns: gmconfig.respawns_allowed,
     zonespeed: gmconfig.zonespeed,
     zoneallowed: gmconfig.usezone,
-    regenallowed: gmconfig.healthautorestore,
+    regenallowed: gmconfig.health_restore,
+    healthdecrease: gmconfig.health_autodamage,
   };
 
   rooms.set(roomId, room);

@@ -75,7 +75,6 @@ function dealDamage(room) {
             player.last_hit_time = new Date().getTime();
             if (1 > player.health) {
 
-              console.log(room.respawn, "fdff")
                 if (1 > player.respawns) {
 
                  
@@ -225,5 +224,6 @@ function handleElimination(room, player) {
 
 module.exports = {
     UseZone,
+    handleElimination,
 };
 

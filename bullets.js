@@ -2,9 +2,6 @@ const { isCollisionWithBullet } = require('./collisions');
 const { handlePlayerCollision } = require('./player');
 const { playerHitboxHeight, playerHitboxWidth, gunsconfig } = require('./config');
 
-
-
-
 function isCollisionWithPlayer(bullet, player) {
   const playerLeft = player.x - playerHitboxWidth / 2.4;
   const playerRight = player.x + playerHitboxWidth / 2.4;
@@ -26,16 +23,14 @@ function isCollisionWithPlayer(bullet, player) {
 
 
 function moveBullet(room, player, playerspeed, direction, timestamp, maxDistance, bullet) {
-  // Find the bullet with the specific rayid (assuming rayid is a timestamp or unique identifier)
-  //const bullet = player.bullets.find(bullet => bullet.timestamp === timestamp);
 
   if (!bullet) {
     console.log("Bullet timestamp not found.");
 
-    return; // Exit function if bullet with rayid is not found
+    return; 
   }
 
-  const finalDirection = direction - 90; // Adjust direction calculation as needed
+  const finalDirection = direction - 90; 
   const radians = (finalDirection * Math.PI) / 180;
   const xDelta = playerspeed * Math.cos(radians);
   const yDelta = playerspeed * Math.sin(radians);
@@ -45,9 +40,6 @@ function moveBullet(room, player, playerspeed, direction, timestamp, maxDistance
 
   const distanceTraveled = Math.sqrt(Math.pow(newX - bullet.startX, 2) + Math.pow(newY - bullet.startY, 2));
   
-
-  //console.log(room.players);
-
 
   if (!isCollisionWithBullet(room.walls, newX, newY) && distanceTraveled <= maxDistance) {
     bullet.x = newX;
@@ -90,9 +82,6 @@ function shootBulletsWithDelay(room, player, direction, speed, length, delay, yO
 }
 
 
- 
-
-
 function shootBullet(room, player, direction, speed, maxDistance, yOffset, damage) {
   return new Promise(async (resolve) => {
 
@@ -100,8 +89,6 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset, damag
     const xOffset = yOffset * Math.cos(radians);
     const yOffsetAdjusted = yOffset * Math.sin(radians);
     const randomPart = Math.random().toString(36).substring(2, 2 + 5);
-
-   
 
     const bullet = {
       x: player.x + xOffset,
@@ -128,7 +115,6 @@ function shootBullet(room, player, direction, speed, maxDistance, yOffset, damag
   });
 }
 
-
 async function handleBulletFired(room, player, gunType) {
   const gun = gunsconfig[gunType];
 
@@ -143,21 +129,12 @@ async function handleBulletFired(room, player, gunType) {
   player.shooting = true;
   player.lastShootTime = currentTime;
   
-  //let definedAngle = 0;
-  //if (gun.useplayerangle === true) { // Correct comparison
-   // definedAngle = player.shoot_direction;
-  //}
-
-  
-
-
-
-   gun.bullets.forEach(bullet => {
-
-       let definedAngle = 0;
+  let definedAngle = 0;
   if (gun.useplayerangle === true) { // Correct comparison
     definedAngle = player.shoot_direction;
   }
+
+   gun.bullets.forEach(bullet => {
     
         const finalAngle = gun.useplayerangle === true ? bullet.angle + definedAngle : bullet.angle;
         shootBulletsWithDelay(room, player, finalAngle, bullet.speed / 1.9, bullet.distance, bullet.delay, bullet.offset, gun.damage);
@@ -168,8 +145,6 @@ async function handleBulletFired(room, player, gunType) {
       player.shooting = false;
     }, shootCooldown);
   }
-
-
 
 module.exports = {
   handleBulletFired,

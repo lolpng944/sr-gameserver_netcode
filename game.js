@@ -4,16 +4,6 @@ function hidePlayer(player) {
   player.visible = false;
 }
 
-function respawnPlayer(room, player) {
-
-  player.health = 100; 
-  player.x = Math.random() * 100; 
-  player.y = Math.random() * 100;
-  player.visible = true;
-
-
-}
-
 function endGameleft(room) {
 
   console.log("Game ended! Closing the room.");
@@ -22,7 +12,6 @@ function endGameleft(room) {
     player.ws.close(4000, "players_left_room_before_start");
   });
 
-  // Remove the room
   rooms.delete(room.roomId);
 }
 
@@ -40,14 +29,10 @@ function endGame(room) {
       player.ws.close(4301, "game_ended");
     }
   });
-
-  // Remove the room
-  // rooms.delete(room.roomId);
 }
 
 module.exports = {
   hidePlayer,
-  respawnPlayer,
   endGame,
   endGameleft,
 };

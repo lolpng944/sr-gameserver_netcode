@@ -58,13 +58,12 @@ async function increasePlayerDamage(playerId, damage) {
   const username = playerId;
   const damagecount = +damage; 
   
-    // Check if damagecount is a valid number
     if (isNaN(damagecount)) {
       return res.status(400).json({ error: "Invalid damage count provided" });
     }
   
     try {
-      // Try to increment damage, ignore upsert if the user doesn't exist
+   
       const incrementResult = await userCollection.updateOne(
         { username },
         {
@@ -84,9 +83,7 @@ async function increasePlayerDamage(playerId, damage) {
           upsert: true,
         },
       );
-  
-  
-      // If the user doesn't exist, perform an upsert to create the document with the specified damage
+
       if (incrementResult.matchedCount === 0) {
         const upsertResult = await userCollection.updateOne(
           { username },
@@ -110,15 +107,14 @@ async function increasePlayerDamage(playerId, damage) {
 
 async function increasePlayerKills(playerId, kills) {
   const username = playerId;
-  const killcount = +kills; // Convert to a number using the unary plus operator
+  const killcount = +kills; 
 
-  // Check if damagecount is a valid number
   if (isNaN(killcount)) {
     return res.status(400).json({ error: "Invalid damage count provided" });
   }
 
   try {
-    // Try to increment damage, ignore upsert if the user doesn't exist
+  
     const incrementResult = await userCollection.updateOne(
       { username },
       {
@@ -126,7 +122,6 @@ async function increasePlayerKills(playerId, kills) {
       }
     );
 
-    // If the user doesn't exist, perform an upsert to create the document with the specified damage
     if (incrementResult.matchedCount === 0) {
       const upsertResult = await userCollection.updateOne(
         { username },
@@ -149,15 +144,14 @@ async function increasePlayerKills(playerId, kills) {
 
 async function increasePlayerWins(playerId, wins2) {
   const username = playerId;
-  const wins = +wins2; // Convert to a number using the unary plus operator
+  const wins = +wins2; 
 
-  // Check if damagecount is a valid number
   if (isNaN(wins)) {
     return res.status(400).json({ error: "Invalid damage count provided" });
   }
 
   try {
-    // Try to increment damage, ignore upsert if the user doesn't exist
+
     const incrementResult = await userCollection.updateOne(
       { username },
       {
@@ -165,7 +159,6 @@ async function increasePlayerWins(playerId, wins2) {
       }
     );
 
-    // If the user doesn't exist, perform an upsert to create the document with the specified damage
     if (incrementResult.matchedCount === 0) {
       const upsertResult = await userCollection.updateOne(
         { username },
@@ -188,9 +181,8 @@ async function increasePlayerWins(playerId, wins2) {
 
 async function increasePlayerPlace(playerId, place2) {
   const username = playerId;
-  const place = +place2; // Convert to a number using the unary plus operator
+  const place = +place2; 
 
-  // Check if place is a valid number
   if (isNaN(place) || place < 1 || place > 5) {
     return res.status(400).json({ error: "Invalid place provided. Place should be a number between 1 and 5." });
   }
@@ -202,7 +194,7 @@ async function increasePlayerPlace(playerId, place2) {
     const skillpoints = place_counts[place - 1];
     const season_coins = ss_counts[place - 1];
     
-    // Update skill points, ensuring it doesn't drop below 0
+
     const updateResult = await userCollection.updateOne(
       { username },
       [
@@ -210,8 +202,8 @@ async function increasePlayerPlace(playerId, place2) {
           $set: {
             sp: {
               $add: [
-                { $ifNull: ["$sp", 0] }, // If sp doesn't exist, default to 0
-                skillpoints // Add the skill points adjustment directly
+                { $ifNull: ["$sp", 0] },
+                skillpoints
               ]
             }
           }
@@ -219,7 +211,7 @@ async function increasePlayerPlace(playerId, place2) {
         {
           $set: {
             sp: {
-              $max: [ "$sp", 0 ] // Ensure sp doesn't drop below 0
+              $max: [ "$sp", 0 ] 
             }
           }
         }
@@ -238,14 +230,14 @@ async function increasePlayerPlace(playerId, place2) {
       },
     );
 
-    // Check if the user exists
+   
     if (updateResult.matchedCount === 0 && updateResult.modifiedCount === 0) {
-      // If not, perform an upsert to create the document with the specified skill points
+    
       const upsertResult = await userCollection.updateOne(
         { username },
         {
           $setOnInsert: {
-            sp: { $max: [ skillpoints, 0 ] } // Ensure sp doesn't drop below 0
+            sp: { $max: [ skillpoints, 0 ] } 
           },
         },
         { upsert: true }
@@ -267,5 +259,4 @@ module.exports = {
   increasePlayerPlace,
   increasePlayerWins,
   verifyPlayer,
-
 };

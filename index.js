@@ -51,7 +51,6 @@ let connectedUsernames = [];
 
 const Limiter = require("limiter").RateLimiter;
 
-
 process.on("SIGINT", function () {
   mongoose.connection.close(function () {
     console.log("Mongoose disconnected on app termination");
@@ -63,7 +62,6 @@ const password = process.env.DB_KEY || "8RLj5Vr3F6DRBAYc"
 const encodedPassword = encodeURIComponent(password);
 
 const uri = `mongodb+srv://Liquem:${encodedPassword}@cluster0.ed4zami.mongodb.net/?retryWrites=true&w=majority`;
-
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
@@ -80,12 +78,10 @@ const client = new MongoClient(uri, {
 
 async function startServer() {
   try {
-    // Connect to the MongoDB server
+  
     await client.connect();
     console.log("Connected to MongoDB");
 
-    // Start the express server
- 
   } catch (err) {
     console.error("Error connecting to MongoDB:", err);
   }
@@ -96,7 +92,6 @@ startServer();
 const db = client.db("Cluster0");
 const userCollection = db.collection("users");
 const battlePassCollection = db.collection("battlepass_users");
-
 
 module.exports = {
   LZString,
@@ -113,11 +108,8 @@ module.exports = {
   jwt,
 };
 
-
-
 const bodyParser = require("body-parser");
 const {
-  sendBatchedMessages,
   joinRoom,
   closeRoom,
   handleRequest,
@@ -130,7 +122,6 @@ const {
 } = require("./dbrequests");
 
 const { game_win_rest_time, maxClients, all_gamemodes, gamemodeconfig } = require("./config");
-const { strict } = require("assert");
 
 const limiter = rateLimit({
   windowMs: 1 * 60 * 1000,
@@ -157,9 +148,6 @@ function endGame(room) {
   });
 }
 
-// Remove the room
-// rooms.delete(room.roomId);
-
 const allowedOrigins = [
   "https://slcount.netlify.app",
   "https://slgame.netlify.app",
@@ -176,9 +164,6 @@ const allowedOrigins = [
   "https://crazygames.com/game/skilled-royale",
 ];
 
-
-
-
 function isValidOrigin(origin) {
   const trimmedOrigin = origin.trim().replace(/(^,)|(,$)/g, "");
   return allowedOrigins.includes(trimmedOrigin);
@@ -187,7 +172,6 @@ function isValidOrigin(origin) {
 function isvalidmode(gmd) {
   return all_gamemodes.includes(gmd);
 }
-
 
 wss.on("connection", (ws, req) => {
 
@@ -200,9 +184,6 @@ wss.on("connection", (ws, req) => {
         return;
     }
 
-  
-
-
     if (connectedClientsCount > maxClients) {
       ws.close(4004, "code:full");
       return;
@@ -211,8 +192,6 @@ wss.on("connection", (ws, req) => {
   const urlParts = req.url.split('/');
   const token = (urlParts[1]);
   const gamemode = (urlParts[2]);
-   // const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-
 
     const origin = req.headers["sec-websocket-origin"] || req.headers.origin;
 
@@ -241,7 +220,6 @@ wss.on("connection", (ws, req) => {
         //  ws.close(4006, "code:double");
         //  return;
         //  }
-
         connectedClientsCount++;
         connectedUsernames.push(result.playerId);
         console.log(connectedUsernames);
@@ -377,7 +355,7 @@ module.exports = {
 };
 
 
-const PORT = process.env.PORT || 8090;
+const PORT = process.env.PORT || 8040;
 
 server.listen(PORT, () => {
   console.log(`Server is listening on port ${PORT}`);
