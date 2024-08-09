@@ -31,11 +31,15 @@ function isWithinZone(room, playerX, playerY) {
     return playerX - 40 >= room.zoneStartX && playerX + 40 <= room.zoneEndX &&
            playerY - 60  >= room.zoneStartY && playerY + 60 <= room.zoneEndY;
 }
-shrinkspeed = 41.4 / 1000
+
 // Function to shrink the game zone
 function shrinkZone(room) {
    dealDamage(room);
+
+
     if (room.zoneEndX > 2 && room.zoneEndY > 2) {
+
+      shrinkspeed = room.zonespeed / 1000
         
       room.zoneStartX += shrinkspeed * room.mapWidth;
       room.zoneStartY += shrinkspeed * room.mapHeight;

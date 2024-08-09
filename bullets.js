@@ -1,7 +1,6 @@
-const { calculateBulletEndpoint, isCollisionWithBullet } = require('./collisions');
-const { handleBulletCollision, handlePlayerCollision } = require('./player');
-const { weaponCooldowns, weaponShootRange, server_tick_rate, wallblocksize, playerHitboxHeight, playerHitboxWidth, gunsconfig } = require('./config');
-const { json } = require('body-parser');
+const { isCollisionWithBullet } = require('./collisions');
+const { handlePlayerCollision } = require('./player');
+const { playerHitboxHeight, playerHitboxWidth, gunsconfig } = require('./config');
 
 
 

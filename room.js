@@ -130,11 +130,19 @@ async function joinRoom(ws, token, gamemode) {
 
         setTimeout(() => {
           room.state = "playing";
-          startRegeneratingHealth(room, 1);
-          UseZone(room);
+
+         if (room.zoneallowed === true) {
+            UseZone(room);
+            }
+
+         if (room.regenallowed === true) {
+            startRegeneratingHealth(room, 1);
+            }
+          
          // generateRandomCoins(room);
         }, game_start_time);
       }
+  
 
       // Set timeout to disconnect player after 5 minutes of inactivity
       const playerTimeout = setTimeout(() => {
@@ -402,6 +410,9 @@ function createRoom(roomId, height, width, gamemode, gmconfig) {
     spawns: mapsconfig[mapid].spawns,
     map: mapid,
     respawns: gmconfig.respawns_allowed,
+    zonespeed: gmconfig.zonespeed,
+    zoneallowed: gmconfig.usezone,
+    regenallowed: gmconfig.healthautorestore,
   };
 
   rooms.set(roomId, room);
