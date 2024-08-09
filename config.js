@@ -6,7 +6,7 @@ const matchmaking_timeout = 300000;
 const player_idle_timeout = 60000;
 const WORLD_WIDTH = 800;
 const WORLD_HEIGHT = 800;
-const playerspeed = 0.40;
+const playerspeed = 0.24;
 const SHOOT_COOLDOWN = 100; 
 const BULLET_DAMAGE = 5;
 const game_start_time = 5000;
@@ -32,10 +32,10 @@ const gamemodeconfig = {
   1: {
     maxplayers: 1,
     respawns_allowed: 0,
-    zonespeed: 13.4,
+    zonespeed: 1.4,
     usezone: true,
     health_restore: true,
-    health_autodamage: true,
+    //health_autodamage: true,
   },
   2: {
     maxplayers: 2,
@@ -43,7 +43,7 @@ const gamemodeconfig = {
     zonespeed: 1.4,
     usezone: true,
     health_restore: true,
-    health_autodamage: true,
+   // health_autodamage: true,
   },
 };
 
