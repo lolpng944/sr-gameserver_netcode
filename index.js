@@ -190,14 +190,6 @@ function isvalidmode(gmd) {
 
 wss.on("connection", (ws, req) => {
 
- const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-
-    try {
-        rateLimiterConnection.consume(ip);
-    } catch (err) {
-        ws.close(4003, "Rate limit exceeded");
-        return;
-    }
 
     if (connectedClientsCount > maxClients) {
       ws.close(4004, "code:full");
@@ -319,53 +311,41 @@ wss.on("connection", (ws, req) => {
 
  
 
-server.on("upgrade", (request, socket, head) => {
-  const ip = request.headers["x-forwarded-for"] || request.socket.remoteAddress;
-
-  rateLimiterConnection.consume(ip).then(() => {
-  // Consume the rate limiter
-
-
-  const origin =
-    request.headers["sec-websocket-origin"] || request.headers.origin;
-
-  if (!isValidOrigin(origin)) {
-    socket.destroy();
-    return;
-  }
-
-  if (connectedClientsCount < maxClients) {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit("connection", ws, request);
+     server.on("upgrade", (request, socket, head) => {
+      const ip = request.headers["x-forwarded-for"] || request.socket.remoteAddress;
+    
+      rateLimiterConnection.consume(ip)
+        .then(() => {
+          const origin = request.headers["sec-websocket-origin"] || request.headers.origin;
+    
+          if (!isValidOrigin(origin)) {
+            socket.destroy();
+            return;
+          }
+    
+          if (connectedClientsCount < maxClients) {
+            wss.handleUpgrade(request, socket, head, (ws) => {
+              wss.emit("connection", ws, request);
+            });
+          } else {
+            socket.destroy();
+          }
+        })
+        .catch(() => {
+          socket.write('HTTP/1.1 429 Too Many Requests\r\n\r\n');
+          socket.destroy();
+        });
     });
-  } else {
-    // Reject the connection if the max number of clients is reached
-    socket.destroy();
-
-  
-  }
-}).catch(() => {
-  socket.write('HTTP/1.1 429 Too Many Requests\r\n\r\n');
-  socket.destroy();
-});
-});
-
-process.on("uncaughtException", (error) => {
-console.error("Uncaught Exception:", error);
-});
-
-// Global error handler for unhandled promise rejections
-process.on("unhandledRejection", (reason, promise) => {
-console.error("Unhandled Rejection:", reason, promise);
-});
-
-module.exports = {
-  handleGlobalErrors: () => {},
-};
-
-
-const PORT = process.env.PORT || 8040;
-
-server.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
-});
+    
+    process.on("uncaughtException", (error) => {
+      console.error("Uncaught Exception:", error);
+    });
+    
+    process.on("unhandledRejection", (reason, promise) => {
+      console.error("Unhandled Rejection:", reason, promise);
+    });
+    
+    const PORT = process.env.PORT || 8040;
+    server.listen(PORT, () => {
+      console.log(`Server is listening on port ${PORT}`);
+    });
