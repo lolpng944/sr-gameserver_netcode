@@ -4,21 +4,9 @@ function hidePlayer(player) {
   player.visible = false;
 }
 
-function endGameleft(room) {
-
-  console.log("Game ended! Closing the room.");
-
-  room.players.forEach((player) => {
-    player.ws.close(4000, "players_left_room_before_start");
-  });
-
-  rooms.delete(room.roomId);
-}
 
 
 function endGame(room) {
-
-  console.log("Game ended! Closing the room.");
 
   room.players.forEach((player) => {
   const placelist = JSON.stringify(room.eliminatedPlayers);
@@ -34,5 +22,4 @@ function endGame(room) {
 module.exports = {
   hidePlayer,
   endGame,
-  endGameleft,
 };

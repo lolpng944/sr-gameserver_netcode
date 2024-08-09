@@ -37,7 +37,6 @@ function startDecreasingHealth(room, intervalInSeconds) {
   room.decreasehealth = setInterval(() => {
 
     decreaseHealthForAllPlayers(room);
-    console.log("fixer")
   }, intervalInSeconds * 1000);
 }
 
@@ -79,7 +78,6 @@ async function regenerateHealthForAllPlayers(room) {
 
 function startRegeneratingHealth(room, intervalInSeconds) {
   room.regeneratehealth = setInterval(() => {
-    console.log("fixer2")
     regenerateHealthForAllPlayers(room);
   }, intervalInSeconds * 1000); 
 }

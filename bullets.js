@@ -25,7 +25,7 @@ function isCollisionWithPlayer(bullet, player) {
 function moveBullet(room, player, playerspeed, direction, timestamp, maxDistance, bullet) {
 
   if (!bullet) {
-    console.log("Bullet timestamp not found.");
+    //console.log("Bullet timestamp not found.");
 
     return; 
   }
@@ -60,7 +60,7 @@ try {
     }
 
   } catch (error) {
-  console.log("cannot read players")
+    
   return;
   }
    

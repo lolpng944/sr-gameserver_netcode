@@ -24,7 +24,7 @@ async function logServerUsage() {
 }
 
 // Log server usage every 5 seconds
-setInterval(logServerUsage, 5000);
+//setInterval(logServerUsage, 5000);
 
 const ConnectionOptionsRateLimit = {
   points: 1, // Number of points
@@ -151,7 +151,6 @@ app.use(cors());
 app.use(bodyParser.json());
 
 function endGame(room) {
-  console.log("Game ended! Closing the room.");
 
   room.players.forEach((player) => {
     const placelist = JSON.stringify(room.eliminatedPlayers);
@@ -216,7 +215,7 @@ wss.on("connection", (ws, req) => {
       return;
     }
 
-    console.log(gamemode, token)
+   // console.log(gamemode, token)
      
 
     if (!(token && token.length < 300 && gamemode in gamemodeconfig)) {
@@ -231,14 +230,13 @@ wss.on("connection", (ws, req) => {
           ws.close(4001, "Invalid token");
           return;
         }
-        console.log("before closed", connectedUsernames);
-        // if (connectedUsernames.includes(result.playerId)) {
-        //  ws.close(4006, "code:double");
-        //  return;
-        //  }
+       // console.log("before closed", connectedUsernames);
+       if (connectedUsernames.includes(result.playerId)) {
+        ws.close(4006, "code:double");
+        return;
+         }
         connectedClientsCount++;
         connectedUsernames.push(result.playerId);
-        console.log(connectedUsernames);
 
         // console.log("Joined room:", result);
 
@@ -257,13 +255,8 @@ wss.on("connection", (ws, req) => {
           const player = result.room.players.get(result.playerId);
           connectedClientsCount--;
           if (player && player.playerId) {
-            const index = connectedUsernames.indexOf(result.playerId);
-            if (index !== -1) {
-              connectedUsernames.splice(index, 1);
-            }
+            connectedUsernames = connectedUsernames.filter(username => username !== player.playerId);
           }
-
-          console.log(connectedUsernames);
 
           if (player) {
             clearInterval(player.moveInterval);
