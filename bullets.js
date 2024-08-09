@@ -143,16 +143,21 @@ async function handleBulletFired(room, player, gunType) {
   player.shooting = true;
   player.lastShootTime = currentTime;
   
-  let definedAngle = 0;
-  if (gun.useplayerangle === true) { // Correct comparison
-    definedAngle = player.shoot_direction;
-  }
+  //let definedAngle = 0;
+  //if (gun.useplayerangle === true) { // Correct comparison
+   // definedAngle = player.shoot_direction;
+  //}
 
   
 
 
 
    gun.bullets.forEach(bullet => {
+
+       let definedAngle = 0;
+  if (gun.useplayerangle === true) { // Correct comparison
+    definedAngle = player.shoot_direction;
+  }
     
         const finalAngle = gun.useplayerangle === true ? bullet.angle + definedAngle : bullet.angle;
         shootBulletsWithDelay(room, player, finalAngle, bullet.speed / 1.9, bullet.distance, bullet.delay, bullet.offset, gun.damage);
