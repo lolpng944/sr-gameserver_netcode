@@ -127,6 +127,7 @@ async function joinRoom(ws, token, gamemode) {
         room.state = "countdown";
 
         room.cleanupinterval = setInterval(() => {
+
           cleanupRoom(roomId);
         }, 1000);
 
