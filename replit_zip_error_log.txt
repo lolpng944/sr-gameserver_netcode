@@ -1,4 +1,0 @@
-{"error":".zip archives do not support non-regular files","level":"error","msg":"unable to write file .cache/replit/modules/nodejs-20:v32-20240401-269b323","time":"2024-04-26T19:46:09Z"}
-{"error":".zip archives do not support non-regular files","level":"error","msg":"unable to write file .cache/replit/modules/replit:v8-20240329-787bc7d","time":"2024-04-26T19:46:10Z"}
-{"error":".zip archives do not support non-regular files","level":"error","msg":"unable to write file node_modules/.bin/lz-string","time":"2024-04-26T19:46:16Z"}
-{"error":".zip archives do not support non-regular files","level":"error","msg":"unable to write file node_modules/.bin/mime","time":"2024-04-26T19:46:16Z"}
